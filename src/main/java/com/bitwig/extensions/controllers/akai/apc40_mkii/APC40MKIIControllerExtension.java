@@ -423,7 +423,7 @@ public class APC40MKIIControllerExtension extends ControllerExtension
 
    private void createShiftLayer()
    {
-      mShiftLayer.bindPressed(mPlayButton, mTransport.continuePlaybackAction());
+      mShiftLayer.bindToggle(mPlayButton, mTransport.isPlaying());
       mShiftLayer.bindToggle(mRecordButton, mTransport.isArrangerRecordEnabled());
       mShiftLayer.bindToggle(mSessionButton, mTransport.isArrangerAutomationWriteEnabled());
 
@@ -585,7 +585,7 @@ public class APC40MKIIControllerExtension extends ControllerExtension
       mRootTrackGroup.isStopped().markInterested();
       mMainLayer.bindInverted(mRootTrackGroup.isStopped(), mMasterTrackStopLed);
 
-      mMainLayer.bindToggle(mPlayButton, mTransport.isPlaying());
+      mMainLayer.bindPressed(mPlayButton, mTransport.continuePlaybackAction());
       mMainLayer.bindToggle(mRecordButton, mTransport.isClipLauncherOverdubEnabled());
       mMainLayer.bindToggle(mSessionButton, mTransport.isClipLauncherAutomationWriteEnabled());
       mMainLayer.bindToggle(mMetronomeButton, mTransport.isMetronomeEnabled());
