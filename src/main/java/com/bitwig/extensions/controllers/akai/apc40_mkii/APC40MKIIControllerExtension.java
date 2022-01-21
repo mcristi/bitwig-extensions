@@ -44,7 +44,7 @@ import com.bitwig.extensions.framework.Layers;
 
 public class APC40MKIIControllerExtension extends ControllerExtension
 {
-   private static final boolean ENABLE_DEBUG_LAYER = true;
+   private static final boolean ENABLE_DEBUG_LAYER = false;
 
    private static final int CHANNEL_STRIP_NUM_PARAMS = 4;
 
@@ -586,6 +586,8 @@ public class APC40MKIIControllerExtension extends ControllerExtension
       mMainLayer.bindInverted(mRootTrackGroup.isStopped(), mMasterTrackStopLed);
 
       mMainLayer.bindPressed(mPlayButton, mTransport.continuePlaybackAction());
+      mMainLayer.bind(mTransport.isPlaying(), mPlayLed);
+
       mMainLayer.bindToggle(mRecordButton, mTransport.isClipLauncherOverdubEnabled());
       mMainLayer.bindToggle(mSessionButton, mTransport.isClipLauncherAutomationWriteEnabled());
       mMainLayer.bindToggle(mMetronomeButton, mTransport.isMetronomeEnabled());
