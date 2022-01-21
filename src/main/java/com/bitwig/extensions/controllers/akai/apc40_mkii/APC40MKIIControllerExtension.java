@@ -613,7 +613,7 @@ public class APC40MKIIControllerExtension extends ControllerExtension
       mMainLayer.bind(mRemoteControls.hasPrevious(), mPrevBankLed);
 
       mMainLayer.bindToggle(mDeviceOnOffButton, mDeviceCursor.isEnabled());
-      mMainLayer.bind(mDeviceCursor.isEnabled(), mDeviceOnOffLed);
+      mMainLayer.bind(mTransport.isAutomationOverrideActive(), mDeviceOnOffLed);
 
       mMainLayer.bindToggle(mDeviceLockButton, mDeviceCursor.isPinned());
       mMainLayer.bind(mDeviceCursor.isPinned(), mDeviceLockLed);
