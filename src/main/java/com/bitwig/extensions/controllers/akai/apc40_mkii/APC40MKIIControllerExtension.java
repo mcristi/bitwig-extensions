@@ -440,7 +440,7 @@ public class APC40MKIIControllerExtension extends ControllerExtension
          for (int j = 0; j < 5; ++j)
          {
             final ClipLauncherSlot slot = clipLauncherSlotBank.getItemAt(j);
-            mShiftLayer.bindPressed(mGridButtons[i + 8 * j], () -> slot.select());
+            mShiftLayer.bindPressed(mGridButtons[i + 8 * j], () -> slot.deleteObject());
          }
       }
    }

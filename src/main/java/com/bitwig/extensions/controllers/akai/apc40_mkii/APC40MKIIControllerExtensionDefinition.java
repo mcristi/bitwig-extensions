@@ -10,7 +10,7 @@ import com.bitwig.extension.controller.api.ControllerHost;
 
 public class APC40MKIIControllerExtensionDefinition extends ControllerExtensionDefinition
 {
-   private final static UUID ID = UUID.fromString("0b134b19-a791-4aa8-8a2f-1fdd2b73c4fc");
+   private final static UUID ID = UUID.fromString("ae1ed4e5-935d-4f6f-bb9c-f3312e73ed28");
 
    @Override
    public String getName()
