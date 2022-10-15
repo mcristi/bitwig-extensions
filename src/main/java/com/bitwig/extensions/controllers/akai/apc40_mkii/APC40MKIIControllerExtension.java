@@ -680,6 +680,13 @@ public class APC40MKIIControllerExtension extends ControllerExtension
       mMainLayer.bindPressed(mShiftButton, mShiftLayer.getActivateAction());
       mMainLayer.bindReleased(mShiftButton, mShiftLayer.getDeactivateAction());
 
+      mMainLayer.bindPressed(mNudgeMinusButton, () -> {
+         mApplication.undo();
+      });
+      mMainLayer.bindPressed(mNudgePlusButton, () -> {
+         mApplication.redo();
+      });
+
       mMainLayer.activate();
    }
 
