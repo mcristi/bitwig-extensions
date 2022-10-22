@@ -27,7 +27,7 @@ public class APC40MKIIControllerExtensionDefinition extends ControllerExtensionD
    @Override
    public String getAuthor()
    {
-      return "Bitwig";
+      return "mcristi";
    }
 
    @Override
