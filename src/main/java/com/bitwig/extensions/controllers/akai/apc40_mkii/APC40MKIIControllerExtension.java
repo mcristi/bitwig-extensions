@@ -437,6 +437,7 @@ public class APC40MKIIControllerExtension extends ControllerExtension
       mShiftLayer.bindToggle(mPlayButton, mTransport.isPlaying());
       mShiftLayer.bindToggle(mRecordButton, mTransport.isArrangerRecordEnabled());
       mShiftLayer.bindToggle(mSessionButton, mTransport.isArrangerAutomationWriteEnabled());
+      mShiftLayer.bind(mCueLevelKnob, mProject.cueMix());
 
       for (int i = 0; i < 8; ++i)
       {
