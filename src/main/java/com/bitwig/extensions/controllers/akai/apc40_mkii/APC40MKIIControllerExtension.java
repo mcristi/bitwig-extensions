@@ -378,6 +378,43 @@ public class APC40MKIIControllerExtension extends ControllerExtension
             activateTopMode(mTopMode);
          });
       }
+
+      for (int i = 0; i < 8; ++i)
+      {
+         final Track track = mTrackBank.getItemAt(i);
+         final ClipLauncherSlotBank clipLauncherSlotBank = track.clipLauncherSlotBank();
+         for (int j = 0; j < 5; ++j)
+         {
+            final ClipLauncherSlot slot = clipLauncherSlotBank.getItemAt(j);
+            mUserSelectLayer.bindPressed(mGridButtons[i + 8 * j], () -> slot.color().set(getSlotColor(slot)));
+         }
+      }
+   }
+
+   private Color getSlotColor(ClipLauncherSlot slot) {
+      Color[] colors = {
+         Color.fromRGB(0.8509804010391235, 0.18039216101169586, 0.1411764770746231), // red
+         Color.fromRGB(1.0, 0.34117648005485535, 0.0235294122248888), // orange
+         Color.fromHex("#e4b74e"), // yellow
+         Color.fromRGB(0.6392157077789307, 0.4745098054409027, 0.26274511218070984), // dark yellow - brown
+         Color.fromRGB(0.26274511218070984, 0.8235294222831726, 0.7254902124404907), // light blue
+         Color.fromRGB(0.0, 0.6000000238418579, 0.8509804010391235), // dark blue
+         Color.fromRGB(0.24313725531101227, 0.7333333492279053, 0.3843137323856354), // light green
+         Color.fromRGB(0.0, 0.615686297416687, 0.27843138575553894), // dark green
+         Color.fromHex("#c9c9c9"), // white
+      };
+      Color currentColor = slot.color().get();
+
+      int colorIndex = 0;
+      for (int i = 0; i < colors.length; i++) {
+         if (colors[i].toHex().equals(currentColor.toHex())) {
+            colorIndex = i + 1;
+         }
+      }
+      if (colorIndex == colors.length) {
+         colorIndex = 0;
+      }
+      return colors[colorIndex];
    }
 
    private void createSendSelectLayer()
