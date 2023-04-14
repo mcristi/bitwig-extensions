@@ -353,6 +353,7 @@ public class APC40MKIIControllerExtension extends ControllerExtension
       mChannelStripLayer = new Layer(mLayers, "ChannelStrip");
       mShiftLayer = new Layer(mLayers, "Shift");
       mBankLayer = new Layer(mLayers, "Bank");
+      mPanSelectLayer = new Layer(mLayers, "PanSelect");
       mSendSelectLayer = new Layer(mLayers, "SendSelect");
       mUserSelectLayer = new Layer(mLayers, "UserSelect");
 
@@ -364,6 +365,7 @@ public class APC40MKIIControllerExtension extends ControllerExtension
       createChannelStripLayer();
       createShiftLayer();
       createBankLayer();
+      createPanSelectLayer();
       createSendSelectLayer();
       createUserSelectLayer();
    }
@@ -386,7 +388,21 @@ public class APC40MKIIControllerExtension extends ControllerExtension
          for (int j = 0; j < 5; ++j)
          {
             final ClipLauncherSlot slot = clipLauncherSlotBank.getItemAt(j);
-            mUserSelectLayer.bindPressed(mGridButtons[i + 8 * j], () -> slot.color().set(getSlotColor(slot)));
+            mUserSelectLayer.bindPressed(mGridButtons[i + 8 * j], () -> slot.deleteObject());
+         }
+      }
+   }
+
+   private void createPanSelectLayer()
+   {
+      for (int i = 0; i < 8; ++i)
+      {
+         final Track track = mTrackBank.getItemAt(i);
+         final ClipLauncherSlotBank clipLauncherSlotBank = track.clipLauncherSlotBank();
+         for (int j = 0; j < 5; ++j)
+         {
+            final ClipLauncherSlot slot = clipLauncherSlotBank.getItemAt(j);
+            mPanSelectLayer.bindPressed(mGridButtons[i + 8 * j], () -> slot.color().set(getSlotColor(slot)));
          }
       }
    }
@@ -427,6 +443,17 @@ public class APC40MKIIControllerExtension extends ControllerExtension
             activateTopMode(mTopMode);
          });
       }
+
+      for (int i = 0; i < 8; ++i)
+      {
+         final Track track = mTrackBank.getItemAt(i);
+         final ClipLauncherSlotBank clipLauncherSlotBank = track.clipLauncherSlotBank();
+         for (int j = 0; j < 5; ++j)
+         {
+            final ClipLauncherSlot slot = clipLauncherSlotBank.getItemAt(j);
+            mSendSelectLayer.bindPressed(mGridButtons[i + 8 * j], () -> slot.duplicateClip());
+         }
+      }
    }
 
    private void createBankLayer()
@@ -456,17 +483,6 @@ public class APC40MKIIControllerExtension extends ControllerExtension
       mBankLayer.bind(() -> mRemoteControls.selectedPageIndex().get() == 5, mDeviceLockLed);
       mBankLayer.bind(() -> mRemoteControls.selectedPageIndex().get() == 6, mClipDeviceViewLed);
       mBankLayer.bind(() -> mRemoteControls.selectedPageIndex().get() == 7, mDetailViewLed);
-
-      for (int i = 0; i < 8; ++i)
-      {
-         final Track track = mTrackBank.getItemAt(i);
-         final ClipLauncherSlotBank clipLauncherSlotBank = track.clipLauncherSlotBank();
-         for (int j = 0; j < 5; ++j)
-         {
-            final ClipLauncherSlot slot = clipLauncherSlotBank.getItemAt(j);
-            mBankLayer.bindPressed(mGridButtons[i + 8 * j], () -> slot.duplicateClip());
-         }
-      }
    }
 
    private void createShiftLayer()
@@ -483,14 +499,6 @@ public class APC40MKIIControllerExtension extends ControllerExtension
             setLaunchQuantizationFromTrackSelect(x);
          }, () -> "Configures the default launch quantization"));
          mShiftLayer.bind(() -> x == computeLaunchQuantizationIndex(), mTrackSelectLeds[x]);
-
-         final Track track = mTrackBank.getItemAt(i);
-         final ClipLauncherSlotBank clipLauncherSlotBank = track.clipLauncherSlotBank();
-         for (int j = 0; j < 5; ++j)
-         {
-            final ClipLauncherSlot slot = clipLauncherSlotBank.getItemAt(j);
-            mShiftLayer.bindPressed(mGridButtons[i + 8 * j], () -> slot.deleteObject());
-         }
       }
    }
 
@@ -1215,6 +1223,13 @@ public class APC40MKIIControllerExtension extends ControllerExtension
       mPanButton.setLabelPosition(RelativePosition.ABOVE);
       mPanButton.pressedAction().setActionMatcher(mMidiIn.createNoteOnActionMatcher(0, BT_PAN));
       mPanButton.releasedAction().setActionMatcher(mMidiIn.createNoteOffActionMatcher(0, BT_PAN));
+      mPanButton.isPressed().addValueObserver(isPressed -> {
+         mPanOn.stateChanged(isPressed);
+         if (mPanOn.isOn())
+            mPanSelectLayer.activate();
+         else
+            mPanSelectLayer.deactivate();
+      });
       mPanLed = mHardwareSurface.createOnOffHardwareLight("PanLed");
       mPanLed.setOnColor(Color.fromRGB255(255,165,0));
       mPanButton.setBackgroundLight(mPanLed);
@@ -1522,7 +1537,7 @@ public class APC40MKIIControllerExtension extends ControllerExtension
       mSendsLed.isOn().setValue(topMode == TopMode.SENDS);
       mUserLed.isOn().setValue(topMode == TopMode.USER);
 
-      if (topMode == TopMode.SENDS && mControlSendEffectSetting.get())
+      if (topMode == TopMode.SENDS && mControlSendEffectSetting.get() && mShiftButton.isPressed().get())
          mTrackCursor.selectChannel(mSendTrackBank.getItemAt(mSendIndex));
    }
 
@@ -1777,6 +1792,8 @@ public class APC40MKIIControllerExtension extends ControllerExtension
 
    private final DoublePressedButtonState mBankOn = new DoublePressedButtonState();
 
+   private final DoublePressedButtonState mPanOn = new DoublePressedButtonState();
+
    private final DoublePressedButtonState mUserOn = new DoublePressedButtonState();
 
    private final DoublePressedButtonState mSendsOn = new DoublePressedButtonState();
@@ -1808,6 +1825,8 @@ public class APC40MKIIControllerExtension extends ControllerExtension
    private Layer mShiftLayer;
 
    private Layer mBankLayer;
+
+   private Layer mPanSelectLayer;
 
    private Layer mSendSelectLayer;
 
