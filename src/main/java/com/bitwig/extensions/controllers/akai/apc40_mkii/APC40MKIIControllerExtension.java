@@ -350,7 +350,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
          activateTopMode(TopMode.PAN);
    }
 
-   private void createLayers()
+   protected void createLayers()
    {
       // We create all the layers here because the main layer might bind actions to activate other layers.
       mLayers = new Layers(this);
@@ -432,7 +432,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
    {
       mShiftLayer.bindPressed(mPlayButton, mTransport.continuePlaybackAction());
       mShiftLayer.bindToggle(mRecordButton, mTransport.isArrangerRecordEnabled());
-      mShiftLayer.bindToggle(mSessionButton, mTransport.isArrangerAutomationWriteEnabled());
+//      mShiftLayer.bindToggle(mSessionButton, mTransport.isArrangerAutomationWriteEnabled());
 
       for (int i = 0; i < 8; ++i)
       {
@@ -573,10 +573,10 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mMainLayer.bindPressed(mTapTempoButton, mTransport.tapTempoAction());
 
       final HardwareActionBindable incTempoAction = getHost().createAction(
-         () -> mTransport.tempo().incRaw(mShiftButton.isPressed().get() ? 0.1 : 1),
+         () -> mTransport.tempo().incRaw(mShiftButton.isPressed().get() ? 0.01 : 1),
          () -> "Increments the tempo");
       final HardwareActionBindable decTempoAction = getHost().createAction(
-         () -> mTransport.tempo().incRaw(mShiftButton.isPressed().get() ? -0.1 : -1),
+         () -> mTransport.tempo().incRaw(mShiftButton.isPressed().get() ? -0.01 : -1),
          () -> "Decrements the tempo");
       mMainLayer.bind(mTempoKnob,
          getHost().createRelativeHardwareControlStepTarget(incTempoAction, decTempoAction));
@@ -593,18 +593,18 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mMainLayer.bindPressed(mPrevBankButton, mRemoteControls.selectPreviousAction());
       mMainLayer.bind(mRemoteControls.hasPrevious(), mPrevBankLed);
 
-      mMainLayer.bindToggle(mDeviceOnOffButton, mDeviceCursor.isEnabled());
-      mMainLayer.bind(mDeviceCursor.isEnabled(), mDeviceOnOffLed);
+//      mMainLayer.bindToggle(mDeviceOnOffButton, mDeviceCursor.isEnabled());
+//      mMainLayer.bind(mDeviceCursor.isEnabled(), mDeviceOnOffLed);
 
-      mMainLayer.bindToggle(mDeviceLockButton, mDeviceCursor.isPinned());
-      mMainLayer.bind(mDeviceCursor.isPinned(), mDeviceLockLed);
+//      mMainLayer.bindToggle(mDeviceLockButton, mDeviceCursor.isPinned());
+//      mMainLayer.bind(mDeviceCursor.isPinned(), mDeviceLockLed);
 
-      mMainLayer.bindPressed(mClipDeviceViewButton,
-         getHost().createAction(() -> mApplication.nextSubPanel(), () -> "Next Sub Panel"));
-      mMainLayer.bind(() -> true, mClipDeviceViewLed);
+//      mMainLayer.bindPressed(mClipDeviceViewButton,
+//         getHost().createAction(() -> mApplication.nextSubPanel(), () -> "Next Sub Panel"));
+//      mMainLayer.bind(() -> true, mClipDeviceViewLed);
 
-      mMainLayer.bindToggle(mDetailViewButton, mDeviceCursor.isWindowOpen());
-      mMainLayer.bind(mDeviceCursor.isWindowOpen(), mDetailViewLed);
+//      mMainLayer.bindToggle(mDetailViewButton, mDeviceCursor.isWindowOpen());
+//      mMainLayer.bind(mDeviceCursor.isWindowOpen(), mDetailViewLed);
 
       mMainLayer.bindPressed(mLauncherUpButton, () -> {
          if (mShiftButton.isPressed().get() ^ mVerticalScrollByPageSetting.get())
@@ -672,7 +672,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
          mMainLayer.bindLightState(() -> computeRGBLedStateForScene(sceneButtonIndex), rgbLed.getLight());
       }
 
-      mMainLayer.activate();
+//      mMainLayer.activate();
    }
 
    private void createHardwareControls()
@@ -903,13 +903,13 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mTapTempoButton.pressedAction().setActionMatcher(mMidiIn.createNoteOnActionMatcher(0, BT_TAP_TEMPO));
       mTapTempoButton.releasedAction().setActionMatcher(mMidiIn.createNoteOffActionMatcher(0, BT_TAP_TEMPO));
 
-      final HardwareButton nudgePlusButton = mHardwareSurface.createHardwareButton("Nudge+");
+      nudgePlusButton = mHardwareSurface.createHardwareButton("Nudge+");
       nudgePlusButton.setLabel("NUDGE +");
       nudgePlusButton.setLabelPosition(RelativePosition.ABOVE);
       nudgePlusButton.pressedAction().setActionMatcher(mMidiIn.createNoteOnActionMatcher(0, BT_NUDGE_PLUS));
       nudgePlusButton.releasedAction().setActionMatcher(mMidiIn.createNoteOffActionMatcher(0, BT_NUDGE_PLUS));
 
-      final HardwareButton nudgeMinusButton = mHardwareSurface.createHardwareButton("Nudge-");
+      nudgeMinusButton = mHardwareSurface.createHardwareButton("Nudge-");
       nudgeMinusButton.setLabel("NUDGE -");
       nudgeMinusButton.setLabelPosition(RelativePosition.ABOVE);
       nudgeMinusButton.pressedAction().setActionMatcher(mMidiIn.createNoteOnActionMatcher(0, BT_NUDGE_MINUS));
@@ -1310,7 +1310,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mShiftButton.releasedAction().setActionMatcher(mMidiIn.createNoteOffActionMatcher(0, BT_SHIFT));
       mShiftButton.isPressed().markInterested();
 
-      final HardwareButton bankButton = mHardwareSurface.createHardwareButton("Bank");
+      bankButton = mHardwareSurface.createHardwareButton("Bank");
       bankButton.setLabel("BANK");
       bankButton.setLabelPosition(RelativePosition.BELOW);
       bankButton.pressedAction().setActionMatcher(mMidiIn.createNoteOnActionMatcher(0, BT_BANK));
@@ -1436,7 +1436,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mSendsLed.isOn().setValue(topMode == TopMode.SENDS);
       mUserLed.isOn().setValue(topMode == TopMode.PROJECT_CONTROLS);
 
-      if (topMode == TopMode.SENDS && mControlSendEffectSetting.get())
+      if (topMode == TopMode.SENDS && mControlSendEffectSetting.get() && mShiftButton.isPressed().get())
          mTrackCursor.selectChannel(mSendTrackBank.getItemAt(mSendIndex));
    }
 
@@ -1565,7 +1565,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
    /**
     * Helper class that will stay as pressed if there is a "double press" (like a double click).
     */
-   private class DoublePressedButtonState
+   protected class DoublePressedButtonState
    {
       void stateChanged(final boolean isPressed)
       {
@@ -1601,19 +1601,19 @@ class APC40MKIIControllerExtension extends ControllerExtension
    // Host Proxy Objects //
    ////////////////////////
 
-   private Application mApplication = null;
+   protected Application mApplication = null;
 
-   private Project mProject;
+   protected Project mProject;
 
    private Track mRootTrackGroup;
 
-   private Transport mTransport = null;
+   protected Transport mTransport = null;
 
    private MasterTrack mMasterTrack = null;
 
    private BooleanValue mIsMasterSelected = null;
 
-   private TrackBank mTrackBank = null;
+   protected TrackBank mTrackBank = null;
 
    private final BooleanValue[] mIsTrackSelected = new BooleanValue[8];
 
@@ -1621,13 +1621,13 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private SceneBank mSceneBank = null;
 
-   private CursorTrack mTrackCursor = null;
+   protected CursorTrack mTrackCursor = null;
 
-   private PinnableCursorDevice mDeviceCursor = null;
+   protected PinnableCursorDevice mDeviceCursor = null;
 
    private CursorRemoteControlsPage mRemoteControls = null;
 
-   private CursorRemoteControlsPage mChannelStripRemoteControls;
+   protected CursorRemoteControlsPage mChannelStripRemoteControls;
 
    private CursorRemoteControlsPage mTrackRemoteControls;
 
@@ -1653,7 +1653,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
    // State //
    ///////////
 
-   private final DoublePressedButtonState mBankOn = new DoublePressedButtonState();
+   protected final DoublePressedButtonState mBankOn = new DoublePressedButtonState();
 
    private final DoublePressedButtonState mUserOn = new DoublePressedButtonState();
 
@@ -1667,9 +1667,9 @@ class APC40MKIIControllerExtension extends ControllerExtension
    // Layers //
    ////////////
 
-   private Layers mLayers;
+   protected Layers mLayers;
 
-   private Layer mMainLayer;
+   protected Layer mMainLayer;
 
    private Layer mPanLayer;
 
@@ -1679,13 +1679,13 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private Layer mProjectRemoteControlsLayer;
 
-   private Layer mShiftLayer;
+   protected Layer mShiftLayer;
 
-   private Layer mBankLayer;
+   protected Layer mBankLayer;
 
-   private Layer mSendSelectLayer;
+   protected Layer mSendSelectLayer;
 
-   private Layer mProjectSelectLayer;
+   protected Layer mProjectSelectLayer;
 
    ///////////////////////
    // Hardware Controls //
@@ -1695,7 +1695,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private AbsoluteHardwareKnob[] mTopControlKnobs;
 
-   private AbsoluteHardwareKnob[] mDeviceControlKnobs;
+   protected AbsoluteHardwareKnob[] mDeviceControlKnobs;
 
    private HardwareSlider[] mTrackVolumeSliders;
 
@@ -1703,9 +1703,9 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private HardwareSlider mABCrossfadeSlider;
 
-   private RelativeHardwareKnob mCueLevelKnob;
+   protected RelativeHardwareKnob mCueLevelKnob;
 
-   private HardwareButton[] mGridButtons;
+   protected HardwareButton[] mGridButtons;
 
    private HardwareButton[] mMuteButtons;
 
@@ -1723,9 +1723,9 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private HardwareButton mMasterTrackStopButton;
 
-   private HardwareButton mPlayButton;
+   protected HardwareButton mPlayButton;
 
-   private HardwareButton mRecordButton;
+   protected HardwareButton mRecordButton;
 
    private HardwareButton mSessionButton;
 
@@ -1735,23 +1735,23 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private RelativeHardwareKnob mTempoKnob;
 
-   private HardwareButton mPrevDeviceButton;
+   protected HardwareButton mPrevDeviceButton;
 
-   private HardwareButton mNextDeviceButton;
+   protected HardwareButton mNextDeviceButton;
 
-   private HardwareButton mPrevBankButton;
+   protected HardwareButton mPrevBankButton;
 
-   private HardwareButton mNextBankButton;
+   protected HardwareButton mNextBankButton;
 
-   private HardwareButton mDeviceOnOffButton;
+   protected HardwareButton mDeviceOnOffButton;
 
-   private HardwareButton mDeviceLockButton;
+   protected HardwareButton mDeviceLockButton;
 
-   private HardwareButton mClipDeviceViewButton;
+   protected HardwareButton mClipDeviceViewButton;
 
-   private HardwareButton mDetailViewButton;
+   protected HardwareButton mDetailViewButton;
 
-   private HardwareButton mShiftButton;
+   protected HardwareButton mShiftButton;
 
    private HardwareButton mLauncherUpButton;
 
@@ -1763,7 +1763,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private HardwareButton[] mSceneButtons;
 
-   private HardwareButton mPanButton;
+   protected HardwareButton mPanButton;
 
    private HardwareButton mSendsButton;
 
@@ -1777,27 +1777,27 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private OnOffHardwareLight mMetronomeLed;
 
-   private OnOffHardwareLight mPlayLed;
+   protected OnOffHardwareLight mPlayLed;
 
    private OnOffHardwareLight mRecordLed;
 
    private OnOffHardwareLight mSessionLed;
 
-   private OnOffHardwareLight mPrevDeviceLed;
+   protected OnOffHardwareLight mPrevDeviceLed;
 
-   private OnOffHardwareLight mNextDeviceLed;
+   protected OnOffHardwareLight mNextDeviceLed;
 
-   private OnOffHardwareLight mPrevBankLed;
+   protected OnOffHardwareLight mPrevBankLed;
 
-   private OnOffHardwareLight mNextBankLed;
+   protected OnOffHardwareLight mNextBankLed;
 
-   private OnOffHardwareLight mDeviceOnOffLed;
+   protected OnOffHardwareLight mDeviceOnOffLed;
 
-   private OnOffHardwareLight mDeviceLockLed;
+   protected OnOffHardwareLight mDeviceLockLed;
 
-   private OnOffHardwareLight mClipDeviceViewLed;
+   protected OnOffHardwareLight mClipDeviceViewLed;
 
-   private OnOffHardwareLight mDetailViewLed;
+   protected OnOffHardwareLight mDetailViewLed;
 
    private OnOffHardwareLight mBankLed;
 
@@ -1824,4 +1824,8 @@ class APC40MKIIControllerExtension extends ControllerExtension
    private final RgbLed[][] mGridLeds = new RgbLed[8][5];
 
    private final RgbLed[] mSceneLeds = new RgbLed[5];
+
+   protected HardwareButton bankButton;
+   protected HardwareButton nudgePlusButton;
+   protected HardwareButton nudgeMinusButton;
 }
