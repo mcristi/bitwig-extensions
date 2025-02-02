@@ -347,7 +347,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
       if (mPanAsTrackRemoteSetting.get())
          activateTopMode(TopMode.TRACK_CONTROLS);
       else
-         activateTopMode(TopMode.PAN);
+         activateTopMode(TopMode.PROJECT_CONTROLS);
    }
 
    protected void createLayers()
@@ -1629,7 +1629,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    protected CursorRemoteControlsPage mChannelStripRemoteControls;
 
-   private CursorRemoteControlsPage mTrackRemoteControls;
+   protected CursorRemoteControlsPage mTrackRemoteControls;
 
    private CursorRemoteControlsPage mProjectRemoteControls;
 

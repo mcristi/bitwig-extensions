@@ -119,25 +119,37 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
       mMainLayer.bindPressed(mDetailViewButton, () -> {
          mApplication.nextSubPanel();
       });
-      mMainLayer.bind(mDeviceCursor.isWindowOpen(), mDetailViewLed);
    }
 
    private void updateShiftLayer()
    {
+      // TODO: add led status as well
       //      mShiftLayer.bindToggle(mSessionButton, mMasterRecorder.isActive());
 
       mShiftLayer.bind(mCueLevelKnob, mProject.cueMix());
+
+      mShiftLayer.bindPressed(nudgeMinusButton, () -> {
+         mApplication.navigateToParentTrackGroup();
+      });
+      mShiftLayer.bindPressed(nudgePlusButton, () -> {
+         if (mTrackCursor.isGroup().get())
+            mApplication.navigateIntoTrackGroup(mTrackCursor);
+      });
 
       // button 6
       mShiftLayer.bindPressed(mDeviceLockButton, () -> {
          mDeviceCursor.isRemoteControlsSectionVisible().toggle();
       });
-      // button 8
-      mShiftLayer.bindPressed(mDetailViewButton, () -> {
+      // button 7
+      mShiftLayer.bindPressed(mClipDeviceViewButton, () -> {
          if (mDeviceCursor.isPlugin().get())
             mDeviceCursor.isWindowOpen().toggle();
          else
             mDeviceCursor.isExpanded().toggle();;
+      });
+      // button 8
+      mShiftLayer.bindPressed(mDetailViewButton, () -> {
+         mApplication.nextPanelLayout();
       });
    }
 
@@ -260,17 +272,41 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
       for (int i = 0; i < 8; ++i)
          mTrackLayer.bind(mDeviceControlKnobs[i], mChannelStripRemoteControls.getParameter(i));
 
-      mTrackLayer.bindPressed(mNextBankButton, mChannelStripRemoteControls.selectNextAction());
-      mTrackLayer.bind(mChannelStripRemoteControls.hasNext(), mNextBankLed);
+      // button & LED 1
+      mTrackLayer.bindPressed(mPrevDeviceButton, () -> {
+         if (mTrackRemoteControls.getParameter(0).value().get() == 0)
+            mTrackRemoteControls.getParameter(0).value().set(1);
+         else
+            mTrackRemoteControls.getParameter(0).value().set(0);
+      });
+      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(0).value().get() != 0, mPrevDeviceLed);
 
-      mTrackLayer.bindPressed(mPrevBankButton, mChannelStripRemoteControls.selectPreviousAction());
-      mTrackLayer.bind(mChannelStripRemoteControls.hasPrevious(), mPrevBankLed);
+      // button & LED 2
+      mTrackLayer.bindPressed(mNextDeviceButton, () -> {
+         if (mTrackRemoteControls.getParameter(1).value().get() == 0)
+            mTrackRemoteControls.getParameter(1).value().set(1);
+         else
+            mTrackRemoteControls.getParameter(1).value().set(0);
+      });
+      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(1).value().get() != 0, mNextDeviceLed);
 
-      //      NOTE: leave default behavior for device buttons
-      //      mTrackLayer.bindPressed(mPrevDeviceButton, () -> {});
-      //      mTrackLayer.bind(() -> false, mPrevDeviceLed);
-      //      mTrackLayer.bindPressed(mNextDeviceButton, () -> {});
-      //      mTrackLayer.bind(() -> false, mNextDeviceLed);
+      // button & LED 3
+      mTrackLayer.bindPressed(mPrevBankButton, () -> {
+         if (mTrackRemoteControls.getParameter(2).value().get() == 0)
+            mTrackRemoteControls.getParameter(2).value().set(1);
+         else
+            mTrackRemoteControls.getParameter(2).value().set(0);
+      });
+      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(2).value().get() != 0, mPrevBankLed);
+
+      // button & LED 4
+      mTrackLayer.bindPressed(mNextBankButton, () -> {
+         if (mTrackRemoteControls.getParameter(3).value().get() == 0)
+            mTrackRemoteControls.getParameter(3).value().set(1);
+         else
+            mTrackRemoteControls.getParameter(3).value().set(0);
+      });
+      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(3).value().get() != 0, mNextBankLed);
 
       mTrackLayer.bind(() -> true, mDeviceLockLed); // LED 6 is always on in this layer
 
@@ -299,12 +335,20 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
          if (mBankOn.isOn())
          {
             if (mTrackRemoteMap.getOrDefault(mTrackCursor.position().getAsInt(), false))
+            {
                mTrackBankLayer.activate();
+               mTrackRemoteControls.selectedPageIndex().set(1);
+            }
          }
          else
          {
             mTrackBankLayer.deactivate();
          }
       });
+   }
+
+   private void showPopup(String message)
+   {
+      getHost().showPopupNotification(message);
    }
 }
