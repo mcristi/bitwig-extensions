@@ -1625,7 +1625,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    protected PinnableCursorDevice mDeviceCursor = null;
 
-   private CursorRemoteControlsPage mRemoteControls = null;
+   protected CursorRemoteControlsPage mRemoteControls = null;
 
    protected CursorRemoteControlsPage mChannelStripRemoteControls;
 
@@ -1733,7 +1733,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private HardwareButton mTapTempoButton;
 
-   private RelativeHardwareKnob mTempoKnob;
+   protected RelativeHardwareKnob mTempoKnob;
 
    protected HardwareButton mPrevDeviceButton;
 

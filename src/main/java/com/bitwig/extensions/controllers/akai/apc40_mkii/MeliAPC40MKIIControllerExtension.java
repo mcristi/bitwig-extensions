@@ -8,7 +8,9 @@ import com.bitwig.extension.controller.api.ClipLauncherSlot;
 import com.bitwig.extension.controller.api.ClipLauncherSlotBank;
 import com.bitwig.extension.controller.api.ControllerHost;
 import com.bitwig.extension.controller.api.DetailEditor;
+import com.bitwig.extension.controller.api.HardwareActionBindable;
 import com.bitwig.extension.controller.api.HardwareControlType;
+import com.bitwig.extension.controller.api.RemoteControl;
 import com.bitwig.extension.controller.api.Track;
 import com.bitwig.extensions.framework.Layer;
 //import com.bitwig.extension.controller.api.MasterRecorder;
@@ -24,6 +26,8 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
    private Layer mPanSelectLayer;
    private Layer mTrackLayer;
    private Layer mTrackBankLayer;
+
+   protected RemoteControl lastRemoteControl;
 
    private final HashMap<Integer, Boolean> mTrackRemoteMap = new HashMap<Integer, Boolean>();
 
@@ -119,6 +123,12 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
       mMainLayer.bindPressed(mDetailViewButton, () -> {
          mApplication.nextSubPanel();
       });
+
+      for (int i = 0; i < 8; ++i)
+      {
+         final int index = i;
+         mRemoteControls.getParameter(index).value().addValueObserver(val -> this.lastRemoteControl = mRemoteControls.getParameter(index));
+      }
    }
 
    private void updateShiftLayer()
@@ -183,6 +193,10 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
 
    private void updateBankLayer()
    {
+      final HardwareActionBindable incValAction = getHost().createAction(() -> lastRemoteControl.value().inc(1, 128), () -> "Increments last remote control");
+      final HardwareActionBindable decValAction = getHost().createAction(() -> lastRemoteControl.value().inc(-1, 128), () -> "Decrements last remote control");
+      mBankLayer.bind(mTempoKnob, getHost().createRelativeHardwareControlStepTarget(incValAction, decValAction));
+
       // cycle to colors and set color to clip
       for (int i = 0; i < 8; ++i)
       {

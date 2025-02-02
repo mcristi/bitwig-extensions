@@ -1,27 +1,34 @@
 ### Changes from upstream
 
+- USER mode selected by default instead of PAN
+
+#### Main layer
+- `NUDGE+` - undo
+- `NUDGE-` - redo
+
+#### Shift layer
+- `SHIFT + NUDGE-` - exit track folder
+- `SHIFT + NUDGE+` - enter track folder
 - `SHIFT + SESSION` - toggle master recording
 - `SHIFT + Tempo` - 0.01 tempo change
 - `SHIFT + SEND + SCENE` - select send track
-- USER mode selected by default instead of PAN
-
-### New features
-
-#### General
-- `NUDGE+` - undo
-- `SHIFT + NUDGE+` - enter track folder
-- `NUDGE-` - redo
-- `SHIFT + NUDGE-` - exit track folder
 - `SHIFT + CUE LEVEL` - cue volume
 
-#### Clip actions
+#### Pan layer
 - `PAN + CLIP` - select clip
-- `SEND + CLIP` - duplicate clip
-- `USER + CLIP` - delete clip
-- `BANK + CLIP` - cycle clip color
 
-#### Track remote 
-- device knobs controls first track page  
+#### Send layer
+- `SEND + CLIP` - duplicate clip
+
+#### User layer
+- `USER + CLIP` - delete clip
+
+#### Bank layer
+- `BANK + CLIP` - cycle clip color
+- `BANK + TEMPO` - increase / decrease value of the last remote control (useful for sample select) 
+
+#### Track remote (layer)
+- device knobs controls first track page 
 - 1-4 buttons controls first 4 button of the second track page
 
 #### Device control buttons + LEDs changes
