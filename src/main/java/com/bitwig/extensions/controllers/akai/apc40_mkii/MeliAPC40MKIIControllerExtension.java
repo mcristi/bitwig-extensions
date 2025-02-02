@@ -127,7 +127,17 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
             final int trackPos = mTrackBank.getItemAt(index).position().get();
             boolean isTrackRemoteEnabled = mTrackRemoteMap.getOrDefault(trackPos, false);
             mTrackRemoteMap.put(trackPos, !isTrackRemoteEnabled);
-            if (isTrackRemoteEnabled) { mTrackLayer.deactivate(); } else { mTrackLayer.activate(); }
+
+            if (trackPos == mTrackCursor.position().getAsInt()) {
+               if (isTrackRemoteEnabled) {
+                  mTrackLayer.deactivate();
+               } else {
+                  mTrackLayer.activate();
+                  mChannelStripRemoteControls.selectedPageIndex().set(0);
+                  mTrackRemoteControls.selectedPageIndex().set(1);
+               }
+            }
+
          });
          mMainLayer.bind(() -> mTrackRemoteMap.getOrDefault(mTrackBank.getItemAt(index).position().get(), false), mMuteLeds[index]);
       }
@@ -289,7 +299,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
          else
             mTrackRemoteControls.getParameter(0).value().set(0);
       });
-      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(0).value().get() != 0, mPrevDeviceLed);
+      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(0).value().get() == 1, mPrevDeviceLed);
 
       // button & LED 2
       mTrackLayer.bindPressed(mNextDeviceButton, () -> {
@@ -298,7 +308,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
          else
             mTrackRemoteControls.getParameter(1).value().set(0);
       });
-      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(1).value().get() != 0, mNextDeviceLed);
+      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(1).value().get() == 1, mNextDeviceLed);
 
       // button & LED 3
       mTrackLayer.bindPressed(mPrevBankButton, () -> {
@@ -307,7 +317,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
          else
             mTrackRemoteControls.getParameter(2).value().set(0);
       });
-      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(2).value().get() != 0, mPrevBankLed);
+      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(2).value().get() == 1, mPrevBankLed);
 
       // button & LED 4
       mTrackLayer.bindPressed(mNextBankButton, () -> {
@@ -316,7 +326,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
          else
             mTrackRemoteControls.getParameter(3).value().set(0);
       });
-      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(3).value().get() != 0, mNextBankLed);
+      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(3).value().get() == 1, mNextBankLed);
 
       // button & LED 5
       mTrackLayer.bindPressed(mDeviceOnOffButton, () -> {
@@ -325,7 +335,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
          else
             mTrackRemoteControls.getParameter(4).value().set(0);
       });
-      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(4).value().get() != 0, mDeviceOnOffLed);
+      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(4).value().get() == 1, mDeviceOnOffLed);
 
       // button & LED 6
       mTrackLayer.bindPressed(mDeviceLockButton, () -> {
@@ -334,7 +344,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
          else
             mTrackRemoteControls.getParameter(5).value().set(0);
       });
-      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(5).value().get() != 0, mDeviceLockLed);
+      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(5).value().get() == 1, mDeviceLockLed);
 
       // button & LED 7
       mTrackLayer.bindPressed(mClipDeviceViewButton, () -> {
@@ -343,7 +353,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
          else
             mTrackRemoteControls.getParameter(6).value().set(0);
       });
-      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(6).value().get() != 0, mClipDeviceViewLed);
+      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(6).value().get() == 1, mClipDeviceViewLed);
 
       // button & LED 8
       mTrackLayer.bindPressed(mDetailViewButton, () -> {
@@ -352,7 +362,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
          else
             mTrackRemoteControls.getParameter(7).value().set(0);
       });
-      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(7).value().get() != 0, mDetailViewLed);
+      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(7).value().get() == 1, mDetailViewLed);
 
       mTrackCursor.position().addValueObserver(newValue -> {
          if (mTrackRemoteMap.getOrDefault(newValue, false))
@@ -381,7 +391,6 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
             if (mTrackRemoteMap.getOrDefault(mTrackCursor.position().getAsInt(), false))
             {
                mTrackBankLayer.activate();
-               mTrackRemoteControls.selectedPageIndex().set(1);
             }
          }
          else
