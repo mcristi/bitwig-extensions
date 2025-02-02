@@ -5,6 +5,8 @@
 #### Main layer
 - `NUDGE+` - undo
 - `NUDGE-` - redo
+- `PLAY` - restore automation override (automation is overridden - LED on)
+- `MUTE TRACK` - switch between device and track remotes mode (track remote mode ON - LED on)
 
 #### Shift layer
 - `SHIFT + NUDGE-` - exit track folder
@@ -14,31 +16,23 @@
 - `SHIFT + SEND + SCENE` - select send track
 - `SHIFT + CUE LEVEL` - cue volume
 
-#### Pan layer
-- `PAN + CLIP` - select clip
-
-#### Send layer
-- `SEND + CLIP` - duplicate clip
-
-#### User layer
-- `USER + CLIP` - delete clip
-
 #### Bank layer
-- `BANK + CLIP` - cycle clip color
-- `BANK + TEMPO` - increase / decrease value of the last remote control (useful for sample select) 
+- `BANK + TEMPO` - increase / decrease value of the last remote control (useful for sample select)
 
-#### Track remote (layer)
+#### Clip actions
+- `PAN + CLIP` - select clip
+- `SEND + CLIP` - duplicate clip
+- `USER + CLIP` - delete clip
+- `BANK + CLIP` - cycle clip color
+
+#### Track remote (new layer per track)
+- layer activated per track w/ mute track button
 - device knobs controls first track page 
-- 1-4 buttons controls first 4 button of the second track page
+- 1-8 buttons controls 8 buttons on the second remote control track page
 
 #### Device control buttons + LEDs changes
-- `BUTTON 5` - restore automation override (automation is overridden - LED on)
+- `SHIFT + BUTTON 7` - cycle panel layout
+- `LED 7` - arranger panel is selected
 
-- `BUTTON 6` - switch between device and track remotes mode (track remote mode ON - LED on)
-- `SHIFT + BUTTON 6` - toggle device remote
-
-- `BUTTON 7`- device on/off toggle (device ON - LED on)
-- `SHIFT + BUTTON 7` - show device details / show VST
-
-- `BUTTON 8`- cycle panel layout
-- `SHIFT + BUTTON 8`- cycle subpanel layout
+- `BUTTON 8`- show device details / show VST
+- `SHIFT + BUTTON 8`- toggle device remote

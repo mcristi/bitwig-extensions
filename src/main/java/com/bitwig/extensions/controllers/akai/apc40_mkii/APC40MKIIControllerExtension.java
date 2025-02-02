@@ -543,8 +543,8 @@ class APC40MKIIControllerExtension extends ControllerExtension
             mMainLayer.bindPressed(mGridButtons[offset], slot.launchAction());
             mMainLayer.bindReleased(mGridButtons[offset], slot.launchReleaseAction());
          }
-         mMainLayer.bindToggle(mMuteButtons[x], track.mute());
-         mMainLayer.bind(() -> track.exists().get() && !track.mute().get(), mMuteLeds[x]);
+//         mMainLayer.bindToggle(mMuteButtons[x], track.mute());
+//         mMainLayer.bind(() -> track.exists().get() && !track.mute().get(), mMuteLeds[x]);
          mMainLayer.bindToggle(mSoloButtons[x], track.solo());
          mMainLayer.bindToggle(mArmButtons[x], track.arm());
          mMainLayer.bindPressed(mABButtons[x], getHost().createAction(() -> {
@@ -566,7 +566,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mRootTrackGroup.isStopped().markInterested();
       mMainLayer.bindInverted(mRootTrackGroup.isStopped(), mMasterTrackStopLed);
 
-      mMainLayer.bindToggle(mPlayButton, mTransport.isPlaying());
+//      mMainLayer.bindToggle(mPlayButton, mTransport.isPlaying());
       mMainLayer.bindToggle(mRecordButton, mTransport.isClipLauncherOverdubEnabled());
       mMainLayer.bindToggle(mSessionButton, mTransport.isClipLauncherAutomationWriteEnabled());
       mMainLayer.bindToggle(mMetronomeButton, mTransport.isMetronomeEnabled());
@@ -593,18 +593,18 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mMainLayer.bindPressed(mPrevBankButton, mRemoteControls.selectPreviousAction());
       mMainLayer.bind(mRemoteControls.hasPrevious(), mPrevBankLed);
 
-//      mMainLayer.bindToggle(mDeviceOnOffButton, mDeviceCursor.isEnabled());
-//      mMainLayer.bind(mDeviceCursor.isEnabled(), mDeviceOnOffLed);
+      mMainLayer.bindToggle(mDeviceOnOffButton, mDeviceCursor.isEnabled());
+      mMainLayer.bind(mDeviceCursor.isEnabled(), mDeviceOnOffLed);
 
-//      mMainLayer.bindToggle(mDeviceLockButton, mDeviceCursor.isPinned());
-//      mMainLayer.bind(mDeviceCursor.isPinned(), mDeviceLockLed);
+      mMainLayer.bindToggle(mDeviceLockButton, mDeviceCursor.isPinned());
+      mMainLayer.bind(mDeviceCursor.isPinned(), mDeviceLockLed);
 
-//      mMainLayer.bindPressed(mClipDeviceViewButton,
-//         getHost().createAction(() -> mApplication.nextSubPanel(), () -> "Next Sub Panel"));
+      mMainLayer.bindPressed(mClipDeviceViewButton,
+         getHost().createAction(() -> mApplication.nextSubPanel(), () -> "Next Sub Panel"));
 //      mMainLayer.bind(() -> true, mClipDeviceViewLed);
 
 //      mMainLayer.bindToggle(mDetailViewButton, mDeviceCursor.isWindowOpen());
-//      mMainLayer.bind(mDeviceCursor.isWindowOpen(), mDetailViewLed);
+      mMainLayer.bind(mDeviceCursor.isWindowOpen(), mDetailViewLed);
 
       mMainLayer.bindPressed(mLauncherUpButton, () -> {
          if (mShiftButton.isPressed().get() ^ mVerticalScrollByPageSetting.get())
@@ -1707,7 +1707,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    protected HardwareButton[] mGridButtons;
 
-   private HardwareButton[] mMuteButtons;
+   protected HardwareButton[] mMuteButtons;
 
    private HardwareButton[] mSoloButtons;
 
@@ -1801,7 +1801,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private OnOffHardwareLight mBankLed;
 
-   private OnOffHardwareLight[] mMuteLeds;
+   protected OnOffHardwareLight[] mMuteLeds;
 
    private MultiStateHardwareLight[] mABLeds;
 
