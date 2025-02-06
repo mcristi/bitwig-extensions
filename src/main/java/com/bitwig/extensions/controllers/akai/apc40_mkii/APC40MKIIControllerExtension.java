@@ -675,7 +675,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
 //      mMainLayer.activate();
    }
 
-   private void createHardwareControls()
+   protected void createHardwareControls()
    {
       mHardwareSurface = getHost().createHardwareSurface();
       mHardwareSurface.setPhysicalSize(420, 260);
@@ -1633,7 +1633,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private CursorRemoteControlsPage mProjectRemoteControls;
 
-   private MidiIn mMidiIn = null;
+   protected MidiIn mMidiIn = null;
 
    private MidiOut mMidiOut = null;
 
@@ -1691,7 +1691,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
    // Hardware Controls //
    ///////////////////////
 
-   private HardwareSurface mHardwareSurface;
+   protected HardwareSurface mHardwareSurface;
 
    private AbsoluteHardwareKnob[] mTopControlKnobs;
 

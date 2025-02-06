@@ -1,5 +1,6 @@
 package com.bitwig.extensions.controllers.akai.apc40_mkii;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.bitwig.extension.api.Color;
@@ -10,6 +11,7 @@ import com.bitwig.extension.controller.api.ClipLauncherSlotBank;
 import com.bitwig.extension.controller.api.ControllerHost;
 import com.bitwig.extension.controller.api.DetailEditor;
 import com.bitwig.extension.controller.api.HardwareActionBindable;
+import com.bitwig.extension.controller.api.HardwareButton;
 import com.bitwig.extension.controller.api.HardwareControlType;
 import com.bitwig.extension.controller.api.RemoteControl;
 import com.bitwig.extension.controller.api.Track;
@@ -19,6 +21,11 @@ import com.bitwig.extensions.framework.Layer;
 
 class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
 {
+   private static final int BT_FOOTSWITCH = 64;
+   protected HardwareButton footswitchButton;
+
+   private ControllerHost host;
+
    private DetailEditor mDetailEditor;
    //   private MasterRecorder mMasterRecorder;
 
@@ -46,7 +53,8 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
    {
       super.init();
 
-      final ControllerHost host = getHost();
+      host = getHost();
+
       //      mMasterRecorder = host.createMasterRecorder();
       mDetailEditor = host.createDetailEditor();
 
@@ -65,6 +73,22 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
          final Track track = mTrackBank.getItemAt(i);
          track.position().markInterested();
       }
+   }
+
+   @Override
+   protected void createHardwareControls()
+   {
+      super.createHardwareControls();
+
+      updateHardwareControls();
+   }
+
+   private void updateHardwareControls()
+   {
+      footswitchButton = mHardwareSurface.createHardwareButton("Footswitch");
+      footswitchButton.setLabel("FS");
+      final int valueWhenPressed = 127;
+      footswitchButton.pressedAction().setActionMatcher(mMidiIn.createCCActionMatcher(0, BT_FOOTSWITCH, valueWhenPressed));
    }
 
    @Override
@@ -140,6 +164,56 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
 
          });
          mMainLayer.bind(() -> mTrackRemoteMap.getOrDefault(mTrackBank.getItemAt(index).position().get(), false), mMuteLeds[index]);
+      }
+
+      mMainLayer.bindPressed(footswitchButton, this::recordClips);
+   }
+
+   private void recordClips() {
+      // get armed tracks from the bank
+      ArrayList<ClipLauncherSlotBank> slotBanks = new ArrayList<>();
+      for (int i = 0; i < 8; ++i)
+      {
+         final Track track = mTrackBank.getItemAt(i);
+         if(track.arm().get()) {
+            slotBanks.add(track.clipLauncherSlotBank());
+         }
+      }
+
+      if (slotBanks.isEmpty()) {
+         this.showPopup("No tracks armed!");
+      }
+
+      // create new clips on each armed tracks
+      for (ClipLauncherSlotBank slotBank : slotBanks)
+      {
+         host.scheduleTask(() -> recordClipOnSlotBank(slotBank), 0);
+      }
+   }
+
+   private void recordClipOnSlotBank(ClipLauncherSlotBank slotBank) {
+      final int bankSize = slotBank.getSizeOfBank();
+      boolean wasClipRecording = false;
+
+      for (int i = 0; i < bankSize; ++i)
+      {
+         final ClipLauncherSlot clip = slotBank.getItemAt(i);
+         if (clip.isRecording().get()) {
+            clip.launch();
+            wasClipRecording = true;
+            i = bankSize; // stop the loop
+         }
+      }
+
+      if (!wasClipRecording) {
+         for (int i = 0; i < bankSize; ++i)
+         {
+            final ClipLauncherSlot clip = slotBank.getItemAt(i);
+            if (!clip.hasContent().get()) {
+               slotBank.record(i);
+               i = bankSize; // stop the loop
+            }
+         }
       }
    }
 
