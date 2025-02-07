@@ -14,7 +14,7 @@
 - `SHIFT + SESSION` - toggle master recording
 - `SHIFT + Tempo` - 0.01 tempo change
 - `SHIFT + SEND + SCENE` - select send track
-- `SHIFT + CUE LEVEL` - cue volume
+- `SHIFT + CUE LEVEL` - cue mix volume
 
 #### Bank layer
 - `BANK + TEMPO` - increase / decrease value of the last remote control (useful for sample select)

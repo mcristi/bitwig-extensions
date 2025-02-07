@@ -221,6 +221,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
    {
       // TODO: add led status as well
       //      mShiftLayer.bindToggle(mSessionButton, mMasterRecorder.isActive());
+      mShiftLayer.bind(mTransport.isPlaying(), mPlayLed);
 
       mShiftLayer.bind(mCueLevelKnob, mProject.cueMix());
 
