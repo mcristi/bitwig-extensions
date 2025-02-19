@@ -1727,7 +1727,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    protected HardwareButton mRecordButton;
 
-   private HardwareButton mSessionButton;
+   protected HardwareButton mSessionButton;
 
    private HardwareButton mMetronomeButton;
 
@@ -1781,7 +1781,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private OnOffHardwareLight mRecordLed;
 
-   private OnOffHardwareLight mSessionLed;
+   protected OnOffHardwareLight mSessionLed;
 
    protected OnOffHardwareLight mPrevDeviceLed;
 

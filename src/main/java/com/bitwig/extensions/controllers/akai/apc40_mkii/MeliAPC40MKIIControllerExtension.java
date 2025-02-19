@@ -13,10 +13,10 @@ import com.bitwig.extension.controller.api.DetailEditor;
 import com.bitwig.extension.controller.api.HardwareActionBindable;
 import com.bitwig.extension.controller.api.HardwareButton;
 import com.bitwig.extension.controller.api.HardwareControlType;
+import com.bitwig.extension.controller.api.MasterRecorder;
 import com.bitwig.extension.controller.api.RemoteControl;
 import com.bitwig.extension.controller.api.Track;
 import com.bitwig.extensions.framework.Layer;
-//import com.bitwig.extension.controller.api.MasterRecorder;
 
 
 class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
@@ -27,7 +27,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
    private ControllerHost host;
 
    private DetailEditor mDetailEditor;
-   //   private MasterRecorder mMasterRecorder;
+   private MasterRecorder mMasterRecorder;
 
    private final DoublePressedButtonState mPanOn = new DoublePressedButtonState();
 
@@ -51,12 +51,12 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
    @Override
    public void init()
    {
-      super.init();
-
       host = getHost();
 
-      //      mMasterRecorder = host.createMasterRecorder();
+      mMasterRecorder = host.createMasterRecorder();
       mDetailEditor = host.createDetailEditor();
+
+      super.init();
 
       mApplication.panelLayout().markInterested();
 
@@ -219,9 +219,12 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
 
    private void updateShiftLayer()
    {
-      // TODO: add led status as well
-      //      mShiftLayer.bindToggle(mSessionButton, mMasterRecorder.isActive());
       mShiftLayer.bind(mTransport.isPlaying(), mPlayLed);
+
+      mShiftLayer.bindPressed(mSessionButton, () -> {
+         mMasterRecorder.toggle();
+      });
+      mShiftLayer.bind(mMasterRecorder.isActive(), mSessionLed);
 
       mShiftLayer.bind(mCueLevelKnob, mProject.cueMix());
 
