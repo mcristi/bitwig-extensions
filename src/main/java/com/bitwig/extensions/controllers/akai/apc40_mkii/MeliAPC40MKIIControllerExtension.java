@@ -330,7 +330,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
             final ClipLauncherSlot slot = clipLauncherSlotBank.getItemAt(j);
             mPanSelectLayer.bindPressed(mGridButtons[i + 8 * j], () -> {
                slot.showInEditor();
-               mDetailEditor.zoomToFit();
+               host.scheduleTask(() -> mDetailEditor.zoomToFit(), 0);
             });
          }
       }
