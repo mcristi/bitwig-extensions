@@ -126,10 +126,18 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
          mApplication.redo();
       });
 
-      // LED 7
+      // BUTTON 6
+      mMainLayer.bindToggle(mDeviceLockButton, mTrackCursor.isPinned());
+      mMainLayer.bind(mTrackCursor.isPinned(), mDeviceLockLed);
+
+      // BUTTON 7
+      mMainLayer.bindPressed(mClipDeviceViewButton, getHost().createAction(() -> {
+         mApplication.nextSubPanel();
+         mDetailEditor.zoomToFit();
+      }, () -> "Next Sub Panel"));
       mMainLayer.bind(() -> mApplication.panelLayout().get().equals(Application.PANEL_LAYOUT_ARRANGE), mClipDeviceViewLed);
 
-      // button 8
+      // BUTTON 8
       mMainLayer.bindPressed(mDetailViewButton, () -> {
          if (mDeviceCursor.isPlugin().get())
             mDeviceCursor.isWindowOpen().toggle();

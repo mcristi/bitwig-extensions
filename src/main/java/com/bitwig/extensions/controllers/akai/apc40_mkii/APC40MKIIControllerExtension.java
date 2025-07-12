@@ -596,11 +596,11 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mMainLayer.bindToggle(mDeviceOnOffButton, mDeviceCursor.isEnabled());
       mMainLayer.bind(mDeviceCursor.isEnabled(), mDeviceOnOffLed);
 
-      mMainLayer.bindToggle(mDeviceLockButton, mDeviceCursor.isPinned());
-      mMainLayer.bind(mDeviceCursor.isPinned(), mDeviceLockLed);
+//      mMainLayer.bindToggle(mDeviceLockButton, mDeviceCursor.isPinned());
+//      mMainLayer.bind(mDeviceCursor.isPinned(), mDeviceLockLed);
 
-      mMainLayer.bindPressed(mClipDeviceViewButton,
-         getHost().createAction(() -> mApplication.nextSubPanel(), () -> "Next Sub Panel"));
+//      mMainLayer.bindPressed(mClipDeviceViewButton,
+//         getHost().createAction(() -> mApplication.nextSubPanel(), () -> "Next Sub Panel"));
 //      mMainLayer.bind(() -> true, mClipDeviceViewLed);
 
 //      mMainLayer.bindToggle(mDetailViewButton, mDeviceCursor.isWindowOpen());
