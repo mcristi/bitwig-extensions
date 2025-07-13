@@ -62,6 +62,8 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
       mChannelStripRemoteControls.selectedPageIndex().markInterested();
 
       mTrackCursor.position().markInterested();
+      mTrackCursor.isPinned().markInterested();
+
       mDeviceCursor.isPlugin().markInterested();
 
       for (int i = 0; i < 8; ++i)
@@ -127,8 +129,16 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
       });
 
       // BUTTON 6
-      mMainLayer.bindToggle(mDeviceLockButton, mTrackCursor.isPinned());
-      mMainLayer.bind(mTrackCursor.isPinned(), mDeviceLockLed);
+      mMainLayer.bindPressed(mDeviceLockButton, getHost().createAction(() -> {
+         if (mDeviceCursor.isPinned().get() || mTrackCursor.isPinned().get()) {
+            mDeviceCursor.isPinned().set(false);
+            mTrackCursor.isPinned().set(false);
+         } else {
+            mDeviceCursor.isPinned().set(true);
+            mTrackCursor.isPinned().set(true);
+         }
+      }, () -> "Toggle device & track pin"));
+      mMainLayer.bind(() -> mDeviceCursor.isPinned().get() && mTrackCursor.isPinned().get(), mDeviceLockLed);
 
       // BUTTON 7
       mMainLayer.bindPressed(mClipDeviceViewButton, getHost().createAction(() -> {
