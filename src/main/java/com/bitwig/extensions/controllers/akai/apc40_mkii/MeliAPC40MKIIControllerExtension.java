@@ -133,7 +133,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
       // BUTTON 7
       mMainLayer.bindPressed(mClipDeviceViewButton, getHost().createAction(() -> {
          mApplication.nextSubPanel();
-         mDetailEditor.zoomToFit();
+         host.scheduleTask(() -> mDetailEditor.zoomToFit(), 0);
       }, () -> "Next Sub Panel"));
       mMainLayer.bind(() -> mApplication.panelLayout().get().equals(Application.PANEL_LAYOUT_ARRANGE), mClipDeviceViewLed);
 
