@@ -19,6 +19,8 @@ import com.bitwig.extensions.framework.Layer;
 
 class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
 {
+   private static final int ZOOM_TO_FIT_TIMEOUT = 100;
+
    private static final int BT_FOOTSWITCH = 64;
    protected HardwareButton footswitchButton;
 
@@ -143,7 +145,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
       // BUTTON 7
       mMainLayer.bindPressed(mClipDeviceViewButton, getHost().createAction(() -> {
          mApplication.nextSubPanel();
-         host.scheduleTask(() -> mDetailEditor.zoomToFit(), 0);
+         host.scheduleTask(() -> mDetailEditor.zoomToFit(), ZOOM_TO_FIT_TIMEOUT);
       }, () -> "Next Sub Panel"));
       mMainLayer.bind(() -> mApplication.panelLayout().get().equals(Application.PANEL_LAYOUT_ARRANGE), mClipDeviceViewLed);
 
@@ -340,7 +342,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
             final ClipLauncherSlot slot = clipLauncherSlotBank.getItemAt(j);
             mPanSelectLayer.bindPressed(mGridButtons[i + 8 * j], () -> {
                slot.showInEditor();
-               host.scheduleTask(() -> mDetailEditor.zoomToFit(), 0);
+               host.scheduleTask(() -> mDetailEditor.zoomToFit(), ZOOM_TO_FIT_TIMEOUT);
             });
          }
       }
