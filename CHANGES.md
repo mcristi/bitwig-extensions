@@ -12,6 +12,7 @@
 - `SHIFT + NUDGE-` - exit track folder
 - `SHIFT + NUDGE+` - enter track folder
 - `SHIFT + SESSION` - toggle master recording
+- `SHIFT + RECORD` - toggle arranger recording
 - `SHIFT + TEMPO` - 0.01 tempo change
 - `SHIFT + SEND + SCENE` - select send track
 - `SHIFT + CUE LEVEL` - cue mix volume
@@ -30,6 +31,5 @@
 #### Device control buttons + LEDs changes
 - `SHIFT + BUTTON 7` - cycle panel layout
 - `LED 7` - arranger panel is selected
-
 - `BUTTON 8`- show device details / show VST
 - `SHIFT + BUTTON 8`- toggle device remote

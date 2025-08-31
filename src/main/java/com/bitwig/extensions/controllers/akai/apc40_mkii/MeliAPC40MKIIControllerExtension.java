@@ -14,6 +14,7 @@ import com.bitwig.extension.controller.api.HardwareButton;
 import com.bitwig.extension.controller.api.HardwareControlType;
 import com.bitwig.extension.controller.api.MasterRecorder;
 import com.bitwig.extension.controller.api.Track;
+import com.bitwig.extension.controller.api.TrackBank;
 import com.bitwig.extensions.framework.Layer;
 
 
@@ -34,6 +35,8 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
    private Layer mPanSelectLayer;
    private Layer mTrackLayer;
    private Layer mTrackBankLayer;
+
+   private TrackBank mAllTracksBank;
 
    private final HashMap<Integer, Boolean> mTrackRemoteMap = new HashMap<Integer, Boolean>();
 
@@ -72,6 +75,17 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
       {
          final Track track = mTrackBank.getItemAt(i);
          track.position().markInterested();
+      }
+
+      mAllTracksBank = host.createTrackBank(32, 5, 5, false);
+      mAllTracksBank.setSkipDisabledItems(false);
+      mAllTracksBank.itemCount().markInterested();
+
+      for (int i = 0; i < 32; ++i)
+      {
+         final Track track = mAllTracksBank.getItemAt(i);
+         track.position().markInterested();
+         track.isActivated().markInterested();
       }
    }
 
@@ -166,21 +180,33 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
             boolean isTrackRemoteEnabled = mTrackRemoteMap.getOrDefault(trackPos, false);
             mTrackRemoteMap.put(trackPos, !isTrackRemoteEnabled);
 
-            if (trackPos == mTrackCursor.position().getAsInt()) {
+            // NOTE: mTrackCursor counts the deactivate tracks as well, mTrackBank not
+            if (trackPos == mTrackCursor.position().getAsInt() - getDeactivateTracksCount()) {
                if (isTrackRemoteEnabled) {
                   mTrackLayer.deactivate();
                } else {
                   mTrackLayer.activate();
+
                   mChannelStripRemoteControls.selectedPageIndex().set(0);
                   mTrackRemoteControls.selectedPageIndex().set(1);
                }
             }
-
          });
          mMainLayer.bind(() -> mTrackRemoteMap.getOrDefault(mTrackBank.getItemAt(index).position().get(), false), mMuteLeds[index]);
       }
 
       mMainLayer.bindPressed(footswitchButton, this::recordClips);
+   }
+
+   private int getDeactivateTracksCount() {
+      int deactivatedTrackCount = 0;
+      for (int trackIndex = 0; trackIndex < mAllTracksBank.itemCount().get(); trackIndex++) {
+         if (!mAllTracksBank.getItemAt(trackIndex).isActivated().get()) {
+            deactivatedTrackCount++;
+         }
+      }
+
+      return deactivatedTrackCount;
    }
 
    private void recordClips() {
@@ -453,7 +479,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
       mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(7).value().get() == 1, mDetailViewLed);
 
       mTrackCursor.position().addValueObserver(newValue -> {
-         if (mTrackRemoteMap.getOrDefault(newValue, false))
+         if (mTrackRemoteMap.getOrDefault(newValue - getDeactivateTracksCount(), false))
             mTrackLayer.activate();
          else
             mTrackLayer.deactivate();
