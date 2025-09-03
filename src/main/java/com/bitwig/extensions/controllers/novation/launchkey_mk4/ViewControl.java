@@ -1,5 +1,6 @@
 package com.bitwig.extensions.controllers.novation.launchkey_mk4;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -43,8 +44,11 @@ public class ViewControl {
     private final Clip arrangerClip;
     private final Scene focusScene;
     private final SceneBank sceneBank;
+    private final String[] trackType = new String[8];
+    private final boolean[] canHoldNoteData = new boolean[8];
     
     public ViewControl(final ControllerHost host) {
+        Arrays.fill(trackType, "");
         rootTrack = host.getProject().getRootTrackGroup();
         trackBank = host.createTrackBank(8, 1, MAX_SCENES, true);
         maxTrackBank = host.createTrackBank(MAX_TRACKS, 1, MAX_SCENES, false);
@@ -60,14 +64,13 @@ public class ViewControl {
             final int index = i;
             final Track track = trackBank.getItemAt(i);
             prepareTrack(track);
-            track.color().addValueObserver((r, g, b) -> {
-                //trackColors[index] = ColorLookup.toColor(r, g, b);
-            });
             track.addIsSelectedInMixerObserver(select -> {
                 if (select) {
                     this.selectedTrackIndex.set(index);
                 }
             });
+            track.trackType().addValueObserver(type -> trackType[index] = type);
+            track.canHoldNoteData().addValueObserver(canHoldNoteData -> this.canHoldNoteData[index] = canHoldNoteData);
         }
         
         sceneBank = trackBank.sceneBank();
@@ -76,13 +79,13 @@ public class ViewControl {
         cursorClip = host.createLauncherCursorClip(16, 128);
         cursorClip.setStepSize(0.125);
         
-        
-        cursorClip.exists().addValueObserver(exists -> LaunchkeyMk4Extension.println("LNC clip ext=%s", exists));
+        cursorClip.exists().markInterested();
         arrangerClip = host.createArrangerCursorClip(16, 128);
         
         primaryDevice =
             cursorTrack.createCursorDevice("DrumDetection", "Pad Device", 2, CursorDeviceFollowMode.FIRST_INSTRUMENT);
-        cursorDevice = cursorTrack.createCursorDevice("device-control", "Device Control", 0,
+        cursorDevice = cursorTrack.createCursorDevice(
+            "device-control", "Device Control", 0,
             CursorDeviceFollowMode.FOLLOW_SELECTION);
         cursorDevice.isWindowOpen().markInterested();
         
@@ -93,24 +96,12 @@ public class ViewControl {
         trackRemotesPages = new RemotePageName(trackRemotes, new BasicStringValue("Track Remotes"));
         projectRemotesPages = new RemotePageName(projectRemotes, new BasicStringValue("Project Remotes"));
         
-        cursorDevice.name().addValueObserver(deviceName -> {
-            deviceDescriptor.set(deviceName);
-        });
+        cursorDevice.name().addValueObserver(deviceDescriptor::set);
         
         sceneBank.canScrollBackwards().markInterested();
         sceneBank.canScrollForwards().markInterested();
         focusScene = sceneBank.getScene(0);
         focusScene.clipCount().markInterested();
-        focusScene.name().addValueObserver(name -> {
-        
-        });
-        
-        
-        prepareTrack(cursorTrack);
-    }
-    
-    public IntValueObject getSelectedTrackIndex() {
-        return selectedTrackIndex;
     }
     
     private void prepareTrack(final Track track) {
@@ -118,6 +109,7 @@ public class ViewControl {
         track.exists().markInterested();
         track.solo().markInterested();
         track.mute().markInterested();
+        track.trackType().markInterested();
         track.canHoldNoteData().markInterested();
     }
     
@@ -129,6 +121,10 @@ public class ViewControl {
             slot.hasContent().markInterested();
             slot.isSelected().markInterested();
         }
+    }
+    
+    public boolean canBeSelectedForSeq(final int index) {
+        return canHoldNoteData[index] && trackType[index].equals("Instrument");
     }
     
     public RemotePageName getDeviceRemotesPages() {
@@ -189,10 +185,6 @@ public class ViewControl {
     
     public PinnableCursorDevice getPrimaryDevice() {
         return primaryDevice;
-    }
-    
-    public BasicStringValue getDeviceDescriptor() {
-        return deviceDescriptor;
     }
     
     public static Optional<ClipLauncherSlot> filterSlot(final Track track, final Predicate<ClipLauncherSlot> check) {
