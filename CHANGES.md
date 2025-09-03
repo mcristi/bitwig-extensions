@@ -1,4 +1,6 @@
-### Changes from upstream
+## Changes from upstream
+
+## Akai APC 40
 
 - USER mode selected by default instead of PAN
 
@@ -33,3 +35,10 @@
 - `LED 7` - arranger panel is selected
 - `BUTTON 8`- show device details / show VST
 - `SHIFT + BUTTON 8`- toggle device remote
+
+## Komplete Kontrol mk3
+
+- Launcher mode enabled by default
+- `PLAY` - continue playback
+- `LOOP` - next sub panel
+- `SHIFT + DEVICE` - toggle on/off device
