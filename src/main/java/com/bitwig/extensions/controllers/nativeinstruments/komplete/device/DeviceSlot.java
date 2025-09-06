@@ -44,9 +44,9 @@ public class DeviceSlot implements DeviceSelectionTab {
     }
 
     public String getName() {
-       if (!device.isEnabled().get()) {
-          return "[X] " + name;
-       }
+//       if (!device.isEnabled().get()) {
+//          return "[X] " + name;
+//       }
 
        return name;
     }

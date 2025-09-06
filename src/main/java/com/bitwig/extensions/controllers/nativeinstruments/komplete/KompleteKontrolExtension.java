@@ -315,7 +315,7 @@ public abstract class KompleteKontrolExtension extends ControllerExtension {
             "Focus", //
             "Recording/Automation",
             new String[] {FocusMode.LAUNCHER.getDescriptor(), FocusMode.ARRANGER.getDescriptor()},
-            FocusMode.ARRANGER.getDescriptor());
+            FocusMode.LAUNCHER.getDescriptor());
         final ModeButton recButton = controlElements.getButton(CcAssignment.REC);
         final ModeButton autoButton = controlElements.getButton(CcAssignment.AUTO);
         final ModeButton countInButton = controlElements.getButton(CcAssignment.COUNT_IN);
@@ -340,10 +340,7 @@ public abstract class KompleteKontrolExtension extends ControllerExtension {
         mainLayer.bindPressed(stopButton.getHwButton(), transport.stopAction());
 
         final ModeButton loopButton = controlElements.getButton(CcAssignment.LOOP);
-        mainLayer.bindPressed(loopButton.getHwButton(), getHost().createAction(() -> {
-            application.nextSubPanel();
-            debugHost.scheduleTask(() -> detailEditor.zoomToFit(), 100);
-        }, () -> "Next Sub Panel"));
+        mainLayer.bindToggle(loopButton.getHwButton(), transport.isArrangerLoopEnabled());
 
         final ModeButton metroButton = controlElements.getButton(CcAssignment.METRO);
         mainLayer.bindToggle(metroButton.getHwButton(), transport.isMetronomeEnabled());
@@ -363,11 +360,9 @@ public abstract class KompleteKontrolExtension extends ControllerExtension {
     }
 
     protected void updateFocusMode(final String newValue) {
-//        final FocusMode newMode = FocusMode.toMode(newValue);
-//       sessionFocusLayer.setIsActive(newMode == FocusMode.LAUNCHER);
-//       arrangeFocusLayer.setIsActive(newMode == FocusMode.ARRANGER);
-        sessionFocusLayer.setIsActive(true);
-        arrangeFocusLayer.setIsActive(false);
+       final FocusMode newMode = FocusMode.toMode(newValue);
+       sessionFocusLayer.setIsActive(newMode == FocusMode.LAUNCHER);
+       arrangeFocusLayer.setIsActive(newMode == FocusMode.ARRANGER);
     }
 
     protected void doHardwareLayout() {

@@ -1,44 +1,35 @@
 package com.bitwig.extensions.controllers.akai.apc40_mkii;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Objects;
 
 import com.bitwig.extension.api.Color;
 import com.bitwig.extension.controller.ControllerExtensionDefinition;
-import com.bitwig.extension.controller.api.Application;
 import com.bitwig.extension.controller.api.ClipLauncherSlot;
 import com.bitwig.extension.controller.api.ClipLauncherSlotBank;
 import com.bitwig.extension.controller.api.ControllerHost;
 import com.bitwig.extension.controller.api.DetailEditor;
 import com.bitwig.extension.controller.api.HardwareButton;
-import com.bitwig.extension.controller.api.HardwareControlType;
 import com.bitwig.extension.controller.api.MasterRecorder;
 import com.bitwig.extension.controller.api.Track;
-import com.bitwig.extension.controller.api.TrackBank;
 import com.bitwig.extensions.framework.Layer;
 
 
 class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
 {
    private static final int ZOOM_TO_FIT_TIMEOUT = 100;
-
    private static final int BT_FOOTSWITCH = 64;
-   protected HardwareButton footswitchButton;
+   private static final String SUB_PANEL_LAYOUT_DEVICE = "DEVICE";
+   private static final String SUB_PANEL_LAYOUT_DETAIL = "DETAIL";
+   private static final String SUB_PANEL_LAYOUT_AUTOMATION = "AUTOMATION";
 
    private ControllerHost host;
-
+   private Layer mPanSelectLayer;
    private DetailEditor mDetailEditor;
    private MasterRecorder mMasterRecorder;
+   private HardwareButton footswitchButton;
 
    private final DoublePressedButtonState mPanOn = new DoublePressedButtonState();
-
-   private Layer mPanSelectLayer;
-   private Layer mTrackLayer;
-   private Layer mTrackBankLayer;
-
-   private TrackBank mAllTracksBank;
-
-   private final HashMap<Integer, Boolean> mTrackRemoteMap = new HashMap<Integer, Boolean>();
+   private String selectedSubPanel = SUB_PANEL_LAYOUT_DEVICE;
 
 
    protected MeliAPC40MKIIControllerExtension(
@@ -47,7 +38,6 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
    {
       super(controllerExtensionDefinition, host);
    }
-
 
    @Override
    public void init()
@@ -59,50 +49,8 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
 
       super.init();
 
-      mApplication.panelLayout().markInterested();
-
-      mChannelStripRemoteControls.setHardwareLayout(HardwareControlType.KNOB, 4);
-      mChannelStripRemoteControls.hasNext().markInterested();
-      mChannelStripRemoteControls.hasPrevious().markInterested();
-      mChannelStripRemoteControls.selectedPageIndex().markInterested();
-
-      mTrackCursor.position().markInterested();
       mTrackCursor.isPinned().markInterested();
-
       mDeviceCursor.isPlugin().markInterested();
-
-      for (int i = 0; i < 8; ++i)
-      {
-         final Track track = mTrackBank.getItemAt(i);
-         track.position().markInterested();
-      }
-
-      mAllTracksBank = host.createTrackBank(32, 5, 5, false);
-      mAllTracksBank.setSkipDisabledItems(false);
-      mAllTracksBank.itemCount().markInterested();
-
-      for (int i = 0; i < 32; ++i)
-      {
-         final Track track = mAllTracksBank.getItemAt(i);
-         track.position().markInterested();
-         track.isActivated().markInterested();
-      }
-   }
-
-   @Override
-   protected void createHardwareControls()
-   {
-      super.createHardwareControls();
-
-      updateHardwareControls();
-   }
-
-   private void updateHardwareControls()
-   {
-      footswitchButton = mHardwareSurface.createHardwareButton("Footswitch");
-      footswitchButton.setLabel("FS");
-      final int valueWhenPressed = 127;
-      footswitchButton.pressedAction().setActionMatcher(mMidiIn.createCCActionMatcher(0, BT_FOOTSWITCH, valueWhenPressed));
    }
 
    @Override
@@ -110,8 +58,6 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
    {
       super.createLayers();
 
-      mTrackLayer = new Layer(mLayers, "Track");
-      mTrackBankLayer = new Layer(mLayers, "Track Bank");
       mPanSelectLayer = new Layer(mLayers, "Pan Select");
 
       updateMainLayer();
@@ -123,19 +69,18 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
       updateBankLayer();
 
       createPanSelectLayer();
-      createTrackLayer();
-      createTrackBankLayer();
-
       updateTopControls();
-      updateDeviceControls();
    }
 
    private void updateMainLayer()
    {
+      mMainLayer.bindPressed(mPlayButton, () -> { mTransport.resetAutomationOverrides();});
       mMainLayer.bind(mTransport.isAutomationOverrideActive(), mPlayLed);
-      mMainLayer.bindPressed(mPlayButton, () -> {
-         mTransport.resetAutomationOverrides();
-      });
+
+      mMainLayer.bindToggle(mRecordButton, mTransport.isArrangerRecordEnabled());
+
+      mMainLayer.bindPressed(mSessionButton, () -> { mMasterRecorder.toggle(); });
+      mMainLayer.bind(mMasterRecorder.isActive(), mSessionLed);
 
       mMainLayer.bindPressed(nudgeMinusButton, () -> {
          mApplication.undo();
@@ -158,10 +103,19 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
 
       // BUTTON 7
       mMainLayer.bindPressed(mClipDeviceViewButton, getHost().createAction(() -> {
-         mApplication.nextSubPanel();
+         if (Objects.equals(selectedSubPanel, SUB_PANEL_LAYOUT_DEVICE)) {
+            mApplication.getAction("Select sub panel 1").invoke();
+            selectedSubPanel = SUB_PANEL_LAYOUT_DETAIL;
+         } else if (Objects.equals(selectedSubPanel, SUB_PANEL_LAYOUT_DETAIL)) {
+            mApplication.getAction("Select sub panel 2").invoke();
+            selectedSubPanel = SUB_PANEL_LAYOUT_AUTOMATION;
+         } else if (Objects.equals(selectedSubPanel, SUB_PANEL_LAYOUT_AUTOMATION)) {
+            mApplication.getAction("Select sub panel 3").invoke();
+            selectedSubPanel = SUB_PANEL_LAYOUT_DEVICE;
+         }
          host.scheduleTask(() -> mDetailEditor.zoomToFit(), ZOOM_TO_FIT_TIMEOUT);
       }, () -> "Next Sub Panel"));
-      mMainLayer.bind(() -> mApplication.panelLayout().get().equals(Application.PANEL_LAYOUT_ARRANGE), mClipDeviceViewLed);
+      mMainLayer.bind(() -> selectedSubPanel.equals(SUB_PANEL_LAYOUT_DEVICE), mClipDeviceViewLed);
 
       // BUTTON 8
       mMainLayer.bindPressed(mDetailViewButton, () -> {
@@ -170,102 +124,10 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
          else
             mDeviceCursor.isExpanded().toggle();
       });
-
-      for (int i = 0; i < 8; ++i)
-      {
-         final int index = i;
-
-         mMainLayer.bindPressed(mMuteButtons[index], () -> {
-            final int trackPos = mTrackBank.getItemAt(index).position().get();
-            boolean isTrackRemoteEnabled = mTrackRemoteMap.getOrDefault(trackPos, false);
-            mTrackRemoteMap.put(trackPos, !isTrackRemoteEnabled);
-
-            // NOTE: mTrackCursor counts the deactivate tracks as well, mTrackBank not
-            if (trackPos == mTrackCursor.position().getAsInt() - getDeactivateTracksCount()) {
-               if (isTrackRemoteEnabled) {
-                  mTrackLayer.deactivate();
-               } else {
-                  mTrackLayer.activate();
-
-                  mChannelStripRemoteControls.selectedPageIndex().set(0);
-                  mTrackRemoteControls.selectedPageIndex().set(1);
-               }
-            }
-         });
-         mMainLayer.bind(() -> mTrackRemoteMap.getOrDefault(mTrackBank.getItemAt(index).position().get(), false), mMuteLeds[index]);
-      }
-
-      mMainLayer.bindPressed(footswitchButton, this::recordClips);
-   }
-
-   private int getDeactivateTracksCount() {
-      int deactivatedTrackCount = 0;
-      for (int trackIndex = 0; trackIndex < mAllTracksBank.itemCount().get(); trackIndex++) {
-         if (!mAllTracksBank.getItemAt(trackIndex).isActivated().get()) {
-            deactivatedTrackCount++;
-         }
-      }
-
-      return deactivatedTrackCount;
-   }
-
-   private void recordClips() {
-      // get armed tracks from the bank
-      ArrayList<ClipLauncherSlotBank> slotBanks = new ArrayList<>();
-      for (int i = 0; i < 8; ++i)
-      {
-         final Track track = mTrackBank.getItemAt(i);
-         if(track.arm().get()) {
-            slotBanks.add(track.clipLauncherSlotBank());
-         }
-      }
-
-      if (slotBanks.isEmpty()) {
-         this.showPopup("No tracks armed!");
-      }
-
-      // create new clips on each armed tracks
-      for (ClipLauncherSlotBank slotBank : slotBanks)
-      {
-         host.scheduleTask(() -> recordClipOnSlotBank(slotBank), 0);
-      }
-   }
-
-   private void recordClipOnSlotBank(ClipLauncherSlotBank slotBank) {
-      final int bankSize = slotBank.getSizeOfBank();
-      boolean wasClipRecording = false;
-
-      for (int i = 0; i < bankSize; ++i)
-      {
-         final ClipLauncherSlot clip = slotBank.getItemAt(i);
-         if (clip.isRecording().get()) {
-            clip.launch();
-            wasClipRecording = true;
-            i = bankSize; // stop the loop
-         }
-      }
-
-      if (!wasClipRecording) {
-         for (int i = 0; i < bankSize; ++i)
-         {
-            final ClipLauncherSlot clip = slotBank.getItemAt(i);
-            if (!clip.hasContent().get()) {
-               slotBank.record(i);
-               i = bankSize; // stop the loop
-            }
-         }
-      }
    }
 
    private void updateShiftLayer()
    {
-      mShiftLayer.bind(mTransport.isPlaying(), mPlayLed);
-
-      mShiftLayer.bindPressed(mSessionButton, () -> {
-         mMasterRecorder.toggle();
-      });
-      mShiftLayer.bind(mMasterRecorder.isActive(), mSessionLed);
-
       mShiftLayer.bind(mCueLevelKnob, mProject.cueMix());
 
       mShiftLayer.bindPressed(nudgeMinusButton, () -> {
@@ -367,123 +229,16 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
          {
             final ClipLauncherSlot slot = clipLauncherSlotBank.getItemAt(j);
             mPanSelectLayer.bindPressed(mGridButtons[i + 8 * j], () -> {
+               slot.select();
                slot.showInEditor();
+
+               mApplication.getAction("Select sub panel 1").invoke();
+               selectedSubPanel = SUB_PANEL_LAYOUT_DETAIL;
+
                host.scheduleTask(() -> mDetailEditor.zoomToFit(), ZOOM_TO_FIT_TIMEOUT);
             });
          }
       }
-   }
-
-   private void createTrackBankLayer()
-   {
-      mTrackBankLayer.bindPressed(mPrevDeviceButton, getHost().createAction(
-         () -> mChannelStripRemoteControls.selectedPageIndex().set(0), () -> "Select Remote Controls Page 1"));
-      mTrackBankLayer.bindPressed(mNextDeviceButton, getHost().createAction(
-         () -> mChannelStripRemoteControls.selectedPageIndex().set(1), () -> "Select Remote Controls Page 2"));
-      mTrackBankLayer.bindPressed(mPrevBankButton, getHost().createAction(
-         () -> mChannelStripRemoteControls.selectedPageIndex().set(2), () -> "Select Remote Controls Page 3"));
-      mTrackBankLayer.bindPressed(mNextBankButton, getHost().createAction(
-         () -> mChannelStripRemoteControls.selectedPageIndex().set(3), () -> "Select Remote Controls Page 4"));
-      mTrackBankLayer.bindPressed(mDeviceOnOffButton, getHost().createAction(
-         () -> mChannelStripRemoteControls.selectedPageIndex().set(4), () -> "Select Remote Controls Page 5"));
-      mTrackBankLayer.bindPressed(mDeviceLockButton, getHost().createAction(
-         () -> mChannelStripRemoteControls.selectedPageIndex().set(5), () -> "Select Remote Controls Page 6"));
-      mTrackBankLayer.bindPressed(mClipDeviceViewButton, getHost().createAction(
-         () -> mChannelStripRemoteControls.selectedPageIndex().set(6), () -> "Select Remote Controls Page 7"));
-      mTrackBankLayer.bindPressed(mDetailViewButton, getHost().createAction(
-         () -> mChannelStripRemoteControls.selectedPageIndex().set(7), () -> "Select Remote Controls Page 8"));
-      mTrackBankLayer.bind(() -> mChannelStripRemoteControls.selectedPageIndex().get() == 0, mPrevDeviceLed);
-      mTrackBankLayer.bind(() -> mChannelStripRemoteControls.selectedPageIndex().get() == 1, mNextDeviceLed);
-      mTrackBankLayer.bind(() -> mChannelStripRemoteControls.selectedPageIndex().get() == 2, mPrevBankLed);
-      mTrackBankLayer.bind(() -> mChannelStripRemoteControls.selectedPageIndex().get() == 3, mNextBankLed);
-      mTrackBankLayer.bind(() -> mChannelStripRemoteControls.selectedPageIndex().get() == 4, mDeviceOnOffLed);
-      mTrackBankLayer.bind(() -> mChannelStripRemoteControls.selectedPageIndex().get() == 5, mDeviceLockLed);
-      mTrackBankLayer.bind(() -> mChannelStripRemoteControls.selectedPageIndex().get() == 6, mClipDeviceViewLed);
-      mTrackBankLayer.bind(() -> mChannelStripRemoteControls.selectedPageIndex().get() == 7, mDetailViewLed);
-   }
-
-   private void createTrackLayer() {
-      for (int i = 0; i < 8; ++i)
-         mTrackLayer.bind(mDeviceControlKnobs[i], mChannelStripRemoteControls.getParameter(i));
-
-      // button & LED 1
-      mTrackLayer.bindPressed(mPrevDeviceButton, () -> {
-         if (mTrackRemoteControls.getParameter(0).value().get() == 0)
-            mTrackRemoteControls.getParameter(0).value().set(1);
-         else
-            mTrackRemoteControls.getParameter(0).value().set(0);
-      });
-      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(0).value().get() == 1, mPrevDeviceLed);
-
-      // button & LED 2
-      mTrackLayer.bindPressed(mNextDeviceButton, () -> {
-         if (mTrackRemoteControls.getParameter(1).value().get() == 0)
-            mTrackRemoteControls.getParameter(1).value().set(1);
-         else
-            mTrackRemoteControls.getParameter(1).value().set(0);
-      });
-      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(1).value().get() == 1, mNextDeviceLed);
-
-      // button & LED 3
-      mTrackLayer.bindPressed(mPrevBankButton, () -> {
-         if (mTrackRemoteControls.getParameter(2).value().get() == 0)
-            mTrackRemoteControls.getParameter(2).value().set(1);
-         else
-            mTrackRemoteControls.getParameter(2).value().set(0);
-      });
-      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(2).value().get() == 1, mPrevBankLed);
-
-      // button & LED 4
-      mTrackLayer.bindPressed(mNextBankButton, () -> {
-         if (mTrackRemoteControls.getParameter(3).value().get() == 0)
-            mTrackRemoteControls.getParameter(3).value().set(1);
-         else
-            mTrackRemoteControls.getParameter(3).value().set(0);
-      });
-      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(3).value().get() == 1, mNextBankLed);
-
-      // button & LED 5
-      mTrackLayer.bindPressed(mDeviceOnOffButton, () -> {
-         if (mTrackRemoteControls.getParameter(4).value().get() == 0)
-            mTrackRemoteControls.getParameter(4).value().set(1);
-         else
-            mTrackRemoteControls.getParameter(4).value().set(0);
-      });
-      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(4).value().get() == 1, mDeviceOnOffLed);
-
-      // button & LED 6
-      mTrackLayer.bindPressed(mDeviceLockButton, () -> {
-         if (mTrackRemoteControls.getParameter(5).value().get() == 0)
-            mTrackRemoteControls.getParameter(5).value().set(1);
-         else
-            mTrackRemoteControls.getParameter(5).value().set(0);
-      });
-      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(5).value().get() == 1, mDeviceLockLed);
-
-      // button & LED 7
-      mTrackLayer.bindPressed(mClipDeviceViewButton, () -> {
-         if (mTrackRemoteControls.getParameter(6).value().get() == 0)
-            mTrackRemoteControls.getParameter(6).value().set(1);
-         else
-            mTrackRemoteControls.getParameter(6).value().set(0);
-      });
-      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(6).value().get() == 1, mClipDeviceViewLed);
-
-      // button & LED 8
-      mTrackLayer.bindPressed(mDetailViewButton, () -> {
-         if (mTrackRemoteControls.getParameter(7).value().get() == 0)
-            mTrackRemoteControls.getParameter(7).value().set(1);
-         else
-            mTrackRemoteControls.getParameter(7).value().set(0);
-      });
-      mTrackLayer.bind(() -> mTrackRemoteControls.getParameter(7).value().get() == 1, mDetailViewLed);
-
-      mTrackCursor.position().addValueObserver(newValue -> {
-         if (mTrackRemoteMap.getOrDefault(newValue - getDeactivateTracksCount(), false))
-            mTrackLayer.activate();
-         else
-            mTrackLayer.deactivate();
-      });
    }
 
    private void updateTopControls()
@@ -497,25 +252,19 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
       });
    }
 
-   private void updateDeviceControls()
+   @Override
+   protected void createHardwareControls()
    {
-      bankButton.isPressed().addValueObserver((isPressed) -> {
-         if (mBankOn.isOn())
-         {
-            if (mTrackRemoteMap.getOrDefault(mTrackCursor.position().getAsInt(), false))
-            {
-               mTrackBankLayer.activate();
-            }
-         }
-         else
-         {
-            mTrackBankLayer.deactivate();
-         }
-      });
+      super.createHardwareControls();
+
+      updateHardwareControls();
    }
 
-   private void showPopup(String message)
+   private void updateHardwareControls()
    {
-      getHost().showPopupNotification(message);
+      footswitchButton = mHardwareSurface.createHardwareButton("Footswitch");
+      footswitchButton.setLabel("FS");
+      final int valueWhenPressed = 127;
+      footswitchButton.pressedAction().setActionMatcher(mMidiIn.createCCActionMatcher(0, BT_FOOTSWITCH, valueWhenPressed));
    }
 }

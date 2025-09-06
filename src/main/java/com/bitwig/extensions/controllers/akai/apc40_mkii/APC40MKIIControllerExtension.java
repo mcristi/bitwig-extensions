@@ -430,8 +430,8 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private void createShiftLayer()
    {
-      mShiftLayer.bindPressed(mPlayButton, mTransport.continuePlaybackAction());
-      mShiftLayer.bindToggle(mRecordButton, mTransport.isArrangerRecordEnabled());
+//      mShiftLayer.bindPressed(mPlayButton, mTransport.continuePlaybackAction());
+//      mShiftLayer.bindToggle(mRecordButton, mTransport.isArrangerRecordEnabled());
 //      mShiftLayer.bindToggle(mSessionButton, mTransport.isArrangerAutomationWriteEnabled());
 
       for (int i = 0; i < 8; ++i)
@@ -543,8 +543,8 @@ class APC40MKIIControllerExtension extends ControllerExtension
             mMainLayer.bindPressed(mGridButtons[offset], slot.launchAction());
             mMainLayer.bindReleased(mGridButtons[offset], slot.launchReleaseAction());
          }
-//         mMainLayer.bindToggle(mMuteButtons[x], track.mute());
-//         mMainLayer.bind(() -> track.exists().get() && !track.mute().get(), mMuteLeds[x]);
+         mMainLayer.bindToggle(mMuteButtons[x], track.mute());
+         mMainLayer.bind(() -> track.exists().get() && !track.mute().get(), mMuteLeds[x]);
          mMainLayer.bindToggle(mSoloButtons[x], track.solo());
          mMainLayer.bindToggle(mArmButtons[x], track.arm());
          mMainLayer.bindPressed(mABButtons[x], getHost().createAction(() -> {
@@ -567,8 +567,8 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mMainLayer.bindInverted(mRootTrackGroup.isStopped(), mMasterTrackStopLed);
 
 //      mMainLayer.bindToggle(mPlayButton, mTransport.isPlaying());
-      mMainLayer.bindToggle(mRecordButton, mTransport.isClipLauncherOverdubEnabled());
-      mMainLayer.bindToggle(mSessionButton, mTransport.isClipLauncherAutomationWriteEnabled());
+//      mMainLayer.bindToggle(mRecordButton, mTransport.isClipLauncherOverdubEnabled());
+//      mMainLayer.bindToggle(mSessionButton, mTransport.isClipLauncherAutomationWriteEnabled());
       mMainLayer.bindToggle(mMetronomeButton, mTransport.isMetronomeEnabled());
       mMainLayer.bindPressed(mTapTempoButton, mTransport.tapTempoAction());
 
