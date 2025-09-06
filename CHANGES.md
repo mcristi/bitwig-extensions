@@ -3,6 +3,7 @@
 ## Akai APC 40
 
 - USER mode selected by default instead of PAN
+- Map Track Remotes to DEVICE CONTROL knobs instead of PAN
 
 #### Main layer
 - `PLAY` - restore automation override (automation is overridden - LED on)
@@ -24,8 +25,18 @@
 - `BANK + CLIP` - cycle clip color
 
 #### Device control buttons + LEDs changes
+- `SHIFT + BUTTON 1` - activate track remotes
+- `SHIFT + LED 1` - track remotes are active
+- `SHIFT + BUTTON 2` - activate device remotes
+- `SHIFT + LED 2` - device remotes are active`
+
+- `BUTTON 6` - pin both track and device
+- `LED 6` - both track and device are pinned
+
+- `BUTTON 7` - cycle sub panel layout
+- `LED 7` - device sub panel is selected
 - `SHIFT + BUTTON 7` - cycle panel layout
-- `LED 7` - arranger panel is selected
+
 - `BUTTON 8`- show device details / show VST
 - `SHIFT + BUTTON 8`- toggle device remote
 

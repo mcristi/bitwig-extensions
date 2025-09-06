@@ -138,6 +138,18 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
             mApplication.navigateIntoTrackGroup(mTrackCursor);
       });
 
+      // BUTTON 1
+      mShiftLayer.bindPressed(mPrevDeviceButton, () -> {
+         activateDeviceControlsMode(DeviceControlMode.TRACK_CONTROLS);
+      });
+      mShiftLayer.bind(() -> mDeviceControlMode == DeviceControlMode.TRACK_CONTROLS, mPrevDeviceLed);
+
+      // BUTTON 2
+      mShiftLayer.bindPressed(mNextDeviceButton, () -> {
+         activateDeviceControlsMode(DeviceControlMode.DEVICE_CONTROLS);
+      });
+      mShiftLayer.bind(() -> mDeviceControlMode == DeviceControlMode.DEVICE_CONTROLS, mNextDeviceLed);
+
       // button 7
       mShiftLayer.bindPressed(mClipDeviceViewButton, () -> {
          mApplication.nextPanelLayout();

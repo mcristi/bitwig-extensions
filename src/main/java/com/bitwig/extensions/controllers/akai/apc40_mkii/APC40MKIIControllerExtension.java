@@ -46,7 +46,12 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private enum TopMode
    {
-      PAN, SENDS, TRACK_CONTROLS, PROJECT_CONTROLS
+      PAN, SENDS, PROJECT_CONTROLS
+   }
+
+   protected enum DeviceControlMode
+   {
+      TRACK_CONTROLS, DEVICE_CONTROLS
    }
 
    private static final int MSG_NOTE_ON = 9;
@@ -324,11 +329,9 @@ class APC40MKIIControllerExtension extends ControllerExtension
    private void createSettingsObjects(final ControllerHost host)
    {
       final Preferences preferences = host.getPreferences();
-      mPanAsTrackRemoteSetting = preferences.getBooleanSetting("Replace PAN by Track Remotes", "Controls",
+      mTrackRemoteSetting = preferences.getBooleanSetting("Replace Device Remotes by Track Remotes", "Controls",
          false);
-      mPanAsTrackRemoteSetting.markInterested();
-      if (mPanAsTrackRemoteSetting.get())
-         mTopMode = TopMode.TRACK_CONTROLS;
+      mTrackRemoteSetting.markInterested();
 
       mHorizontalScrollByPageSetting = preferences.getBooleanSetting("Scroll by page (Horizontal)",
          "Clip Launcher", false);
@@ -344,10 +347,12 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private void postInit()
    {
-      if (mPanAsTrackRemoteSetting.get())
-         activateTopMode(TopMode.TRACK_CONTROLS);
+      if (mTrackRemoteSetting.get())
+         activateDeviceControlsMode(DeviceControlMode.TRACK_CONTROLS);
       else
-         activateTopMode(TopMode.PROJECT_CONTROLS);
+         activateDeviceControlsMode(DeviceControlMode.DEVICE_CONTROLS);
+
+      activateTopMode(TopMode.PROJECT_CONTROLS);
    }
 
    protected void createLayers()
@@ -483,7 +488,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
    private void createTrackRemotesControlLayer()
    {
       for (int i = 0; i < 8; ++i)
-         mTrackRemoteControlsLayer.bind(mTopControlKnobs[i], mTrackRemoteControls.getParameter(i));
+         mTrackRemoteControlsLayer.bind(mDeviceControlKnobs[i], mTrackRemoteControls.getParameter(i));
    }
 
    private void createProjectRemotesControlsLayer()
@@ -640,7 +645,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
       mMainLayer.bindPressed(mPanButton,
          getHost().createAction(
-            () -> activateTopMode(mPanAsTrackRemoteSetting.get() ? TopMode.TRACK_CONTROLS : TopMode.PAN),
+            () -> activateTopMode(TopMode.PAN),
             () -> "Activate Pan mode or Track Remote Controls mode"));
       mMainLayer.bindPressed(mSendsButton,
          getHost().createAction(() -> activateTopMode(TopMode.SENDS), () -> "Activate Sends mode"));
@@ -1376,7 +1381,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
       {
       case PAN -> KnobLed.RING_PAN;
       case SENDS -> KnobLed.RING_VOLUME;
-      case TRACK_CONTROLS, PROJECT_CONTROLS -> KnobLed.RING_SINGLE;
+      case PROJECT_CONTROLS -> KnobLed.RING_SINGLE;
       default -> throw new IllegalStateException();
       };
       knobLed.setRing(knob.hasTargetValue().get() ? ring : KnobLed.RING_OFF);
@@ -1429,15 +1434,21 @@ class APC40MKIIControllerExtension extends ControllerExtension
          mSendLayers[i].setIsActive(topMode == TopMode.SENDS && mSendIndex == i);
 
       mPanLayer.setIsActive(topMode == TopMode.PAN);
-      mTrackRemoteControlsLayer.setIsActive(topMode == TopMode.TRACK_CONTROLS);
       mProjectRemoteControlsLayer.setIsActive(topMode == TopMode.PROJECT_CONTROLS);
 
-      mPanLed.isOn().setValue(topMode == TopMode.PAN || topMode == TopMode.TRACK_CONTROLS);
+      mPanLed.isOn().setValue(topMode == TopMode.PAN);
       mSendsLed.isOn().setValue(topMode == TopMode.SENDS);
       mUserLed.isOn().setValue(topMode == TopMode.PROJECT_CONTROLS);
 
       if (topMode == TopMode.SENDS && mControlSendEffectSetting.get() && mShiftButton.isPressed().get())
          mTrackCursor.selectChannel(mSendTrackBank.getItemAt(mSendIndex));
+   }
+
+   protected void activateDeviceControlsMode(final DeviceControlMode deviceControlMode)
+   {
+      mDeviceControlMode = deviceControlMode;
+
+      mTrackRemoteControlsLayer.setIsActive(mDeviceControlMode == DeviceControlMode.TRACK_CONTROLS);
    }
 
    private void onSysexIn(final String sysex)
@@ -1641,7 +1652,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
    // Settings //
    //////////////
 
-   private SettableBooleanValue mPanAsTrackRemoteSetting;
+   private SettableBooleanValue mTrackRemoteSetting;
 
    private SettableBooleanValue mHorizontalScrollByPageSetting;
 
@@ -1660,6 +1671,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
    private final DoublePressedButtonState mSendsOn = new DoublePressedButtonState();
 
    private TopMode mTopMode = TopMode.PAN;
+   protected DeviceControlMode mDeviceControlMode = DeviceControlMode.DEVICE_CONTROLS;
 
    private int mSendIndex = 0; // 0..4
 
