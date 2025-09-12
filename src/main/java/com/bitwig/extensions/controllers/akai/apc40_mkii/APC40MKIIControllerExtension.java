@@ -1447,7 +1447,6 @@ class APC40MKIIControllerExtension extends ControllerExtension
    protected void activateDeviceControlsMode(final DeviceControlMode deviceControlMode)
    {
       mDeviceControlMode = deviceControlMode;
-
       mTrackRemoteControlsLayer.setIsActive(mDeviceControlMode == DeviceControlMode.TRACK_CONTROLS);
    }
 

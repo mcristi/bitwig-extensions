@@ -22,7 +22,6 @@ public class DeviceSlot implements DeviceSelectionTab {
     public DeviceSlot(final int index, final Device device) {
         this.index = index;
         this.device = device;
-        this.device.isEnabled().markInterested();
 
         if (this.device != null) {
             final DeviceLayerBank layerBank = device.createLayerBank(64);
@@ -44,10 +43,6 @@ public class DeviceSlot implements DeviceSelectionTab {
     }
 
     public String getName() {
-//       if (!device.isEnabled().get()) {
-//          return "[X] " + name;
-//       }
-
        return name;
     }
 
@@ -92,7 +87,7 @@ public class DeviceSlot implements DeviceSelectionTab {
     @Override
     public String getLayerCode() {
         if (!hasLayers && !hasDrumPads) {
-            return getName();
+            return name;
         }
         if (isExpanded) {
             return "{\"n\":\"%s\",\"c\":[%s]}".formatted(
@@ -107,12 +102,9 @@ public class DeviceSlot implements DeviceSelectionTab {
         this.isExpanded = !this.isExpanded;
     }
 
-    public void select(boolean isShiftHeld) {
+    public void select() {
         if (device != null) {
             device.selectInEditor();
-            if (isShiftHeld) {
-               device.isEnabled().toggle();
-            }
         }
     }
 

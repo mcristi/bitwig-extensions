@@ -51,8 +51,6 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
         sessionFocusLayer = new Layer(layers, "SessionFocus");
         navigationLayer = new Layer(layers, "NavigationLayer");
         clipSceneCursor = viewControl.getClipSceneCursor();
-        application = host.createApplication();
-        detailEditor = host.createDetailEditor();
 
         final MidiIn midiIn2 = host.getMidiInPort(1);
         final NoteInput noteInput =

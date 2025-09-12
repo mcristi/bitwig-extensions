@@ -210,8 +210,6 @@ public class DeviceControl implements DeviceMidiListener {
     @Override
     public void handleDeviceSelect(final int[] selectionPath) {
         //KompleteKontrolExtension.println(" SELECT INDEX = %s", Arrays.toString(selectionPath));
-
-       boolean isShiftHeld = controlElements.getShiftHeld().get();
-       this.mainBank.select(isShiftHeld, selectionPath);
+       this.mainBank.select(selectionPath);
     }
 }

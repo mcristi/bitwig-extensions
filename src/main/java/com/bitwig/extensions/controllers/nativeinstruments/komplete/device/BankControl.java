@@ -71,7 +71,7 @@ public class BankControl {
                 currentFocus.set(Focus.DEVICE);
             }
             if (!nested) {
-                select(false, Math.max(0, currentDeviceIndex + (present ? 1 : -1)));
+                select(Math.max(0, currentDeviceIndex + (present ? 1 : -1)));
             } else {
                 deviceControl.triggerUpdateAction();
             }
@@ -85,7 +85,7 @@ public class BankControl {
                 currentFocus.set(Focus.DEVICE);
             }
             if (!nested) {
-                select(false, Math.max(0, currentDeviceIndex + (present ? 1 : -1)));
+                select(Math.max(0, currentDeviceIndex + (present ? 1 : -1)));
             } else {
                 deviceControl.triggerUpdateAction();
             }
@@ -182,7 +182,7 @@ public class BankControl {
         return 0;
     }
 
-    public void select(boolean isShiftHeld, final int... selectionPath) {
+    public void select(final int... selectionPath) {
         if (selectionPath.length == 0) {
             return;
         }
@@ -215,7 +215,7 @@ public class BankControl {
 
         final DeviceSlot slot = devices.get(index);
         if (selectionPath.length == 1) {
-            slot.select(isShiftHeld);
+            slot.select();
             if (slot.isSelected()) {
                 if (slot.hasLayers()) {
                     slot.toggleExpanded();

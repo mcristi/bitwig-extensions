@@ -17,6 +17,7 @@
 - `SHIFT + NUDGE+` - enter track folder
 - `SHIFT + TEMPO` - 0.01 tempo change
 - `SHIFT + CUE LEVEL` - cue mix volume
+- `SHIFT + SENDS` - select sends tracks only if shift is pressed
 
 #### Clip actions
 - `PAN + CLIP` - select clip
@@ -43,4 +44,3 @@
 ## Komplete Kontrol mk3
 - LAUNCHER mode enabled by default
 - `PLAY` - continue playback
-- `SHIFT + DEVICE` - toggle on/off device
