@@ -67,6 +67,16 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
         midiProcessor.addTempoListener(this::handleTempoIncoming);
         initScrubZoomControl();
         activateStandardLayers();
+
+        // NOTE: workaround for glitchy plugin mode after project init
+        application = host.createApplication();
+        application.hasActiveEngine().addValueObserver((active) -> {
+           if (active) {
+              host.scheduleTask(() -> {
+                 midiProcessor.intoDawMode(0x4);
+              }, 6000);
+           }
+        });
     }
 
     protected void initScrubZoomControl() {
