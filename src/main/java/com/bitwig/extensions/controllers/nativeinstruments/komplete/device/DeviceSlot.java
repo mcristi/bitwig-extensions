@@ -15,6 +15,7 @@ public class DeviceSlot implements DeviceSelectionTab {
     private boolean hasDrumPads;
 
     private boolean isExpanded;
+    private boolean enabled;
     private final Device device;
     private boolean selected;
     private final List<LayerSlot> layerSlots = new ArrayList<>();
@@ -22,7 +23,6 @@ public class DeviceSlot implements DeviceSelectionTab {
     public DeviceSlot(final int index, final Device device) {
         this.index = index;
         this.device = device;
-
         if (this.device != null) {
             final DeviceLayerBank layerBank = device.createLayerBank(64);
             for (int i = 0; i < layerBank.getSizeOfBank(); i++) {
@@ -39,11 +39,11 @@ public class DeviceSlot implements DeviceSelectionTab {
     }
 
     public List<String> getLayerList() {
-        return layerSlots.stream().filter(LayerSlot::isExists).map(LayerSlot::getName).toList();
+        return layerSlots.stream().filter(LayerSlot::isExists).map(LayerSlot::displayName).toList();
     }
 
     public String getName() {
-       return name;
+        return name;
     }
 
     public void setName(final String name) {
@@ -84,17 +84,32 @@ public class DeviceSlot implements DeviceSelectionTab {
         this.selected = selected;
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(final boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    private String displayName() {
+        if (enabled) {
+            return name;
+        }
+        return "[x] %s".formatted(name);
+    }
+
     @Override
     public String getLayerCode() {
         if (!hasLayers && !hasDrumPads) {
-            return name;
+            return displayName();
         }
         if (isExpanded) {
             return "{\"n\":\"%s\",\"c\":[%s]}".formatted(
-                name,
+                displayName(),
                 getLayerList().stream().map("\"%s\""::formatted).collect(Collectors.joining(",")));
         } else {
-            return "{\"n\":\"%s\",\"c\":[]}".formatted(name);
+            return "{\"n\":\"%s\",\"c\":[]}".formatted(displayName());
         }
     }
 
@@ -112,5 +127,13 @@ public class DeviceSlot implements DeviceSelectionTab {
         final LayerSlot layer = layerSlots.get(slotIndex);
         layer.select();
         return layer.getDevice();
+    }
+
+    public void toggleLayerActive(final int slotIndex) {
+        layerSlots.get(slotIndex).toggleActive();
+    }
+
+    public void toggleEnabled() {
+        device.isEnabled().toggle();
     }
 }
