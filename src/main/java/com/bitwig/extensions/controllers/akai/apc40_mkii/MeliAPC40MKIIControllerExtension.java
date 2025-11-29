@@ -21,6 +21,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
    private static final String SUB_PANEL_LAYOUT_DEVICE = "DEVICE";
    private static final String SUB_PANEL_LAYOUT_DETAIL = "DETAIL";
    private static final String SUB_PANEL_LAYOUT_AUTOMATION = "AUTOMATION";
+   private static final String SUB_PANEL_HIDDEN = "HIDDEN";
 
    private ControllerHost host;
    private Layer mPanSelectLayer;
@@ -103,15 +104,18 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
 
       // BUTTON 7
       mMainLayer.bindPressed(mClipDeviceViewButton, getHost().createAction(() -> {
-         if (Objects.equals(selectedSubPanel, SUB_PANEL_LAYOUT_DEVICE)) {
+         if (Objects.equals(selectedSubPanel, SUB_PANEL_HIDDEN)) {
+            mApplication.getAction("Select sub panel 3").invoke();
+            selectedSubPanel = SUB_PANEL_LAYOUT_DEVICE;
+         } else if (Objects.equals(selectedSubPanel, SUB_PANEL_LAYOUT_DEVICE)) {
             mApplication.getAction("Select sub panel 1").invoke();
             selectedSubPanel = SUB_PANEL_LAYOUT_DETAIL;
          } else if (Objects.equals(selectedSubPanel, SUB_PANEL_LAYOUT_DETAIL)) {
             mApplication.getAction("Select sub panel 2").invoke();
             selectedSubPanel = SUB_PANEL_LAYOUT_AUTOMATION;
          } else if (Objects.equals(selectedSubPanel, SUB_PANEL_LAYOUT_AUTOMATION)) {
-            mApplication.getAction("Select sub panel 3").invoke();
-            selectedSubPanel = SUB_PANEL_LAYOUT_DEVICE;
+            mApplication.toggleAutomationEditor();
+            selectedSubPanel = SUB_PANEL_HIDDEN;
          }
          host.scheduleTask(() -> mDetailEditor.zoomToFit(), ZOOM_TO_FIT_TIMEOUT);
       }, () -> "Next Sub Panel"));
