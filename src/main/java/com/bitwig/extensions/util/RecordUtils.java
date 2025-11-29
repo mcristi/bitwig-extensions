@@ -75,7 +75,7 @@ public class RecordUtils
                 clip.record();
 
                 if (!multiTrackRecord) {
-                    ApplicationUtils.showDetailEditorPanel(application);
+                    ApplicationUtils.showEditPanelLayout(application);
 
                     clip.select();
                     clip.showInEditor();

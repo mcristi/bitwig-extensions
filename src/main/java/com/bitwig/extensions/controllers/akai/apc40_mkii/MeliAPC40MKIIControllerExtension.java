@@ -12,16 +12,15 @@ import com.bitwig.extension.controller.api.HardwareButton;
 import com.bitwig.extension.controller.api.MasterRecorder;
 import com.bitwig.extension.controller.api.Track;
 import com.bitwig.extensions.framework.Layer;
+import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_ARRANGE;
+import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_EDIT;
+import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_MIX;
 
 
 class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
 {
    private static final int ZOOM_TO_FIT_TIMEOUT = 100;
    private static final int BT_FOOTSWITCH = 64;
-   private static final String SUB_PANEL_LAYOUT_DEVICE = "DEVICE";
-   private static final String SUB_PANEL_LAYOUT_DETAIL = "DETAIL";
-   private static final String SUB_PANEL_LAYOUT_AUTOMATION = "AUTOMATION";
-   private static final String SUB_PANEL_HIDDEN = "HIDDEN";
 
    private ControllerHost host;
    private Layer mPanSelectLayer;
@@ -30,8 +29,6 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
    private HardwareButton footswitchButton;
 
    private final DoublePressedButtonState mPanOn = new DoublePressedButtonState();
-   private String selectedSubPanel = SUB_PANEL_LAYOUT_DEVICE;
-
 
    protected MeliAPC40MKIIControllerExtension(
       final ControllerExtensionDefinition controllerExtensionDefinition,
@@ -52,6 +49,8 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
 
       mTrackCursor.isPinned().markInterested();
       mDeviceCursor.isPlugin().markInterested();
+
+      mApplication.panelLayout().markInterested();
    }
 
    @Override
@@ -104,22 +103,14 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
 
       // BUTTON 7
       mMainLayer.bindPressed(mClipDeviceViewButton, getHost().createAction(() -> {
-         if (Objects.equals(selectedSubPanel, SUB_PANEL_HIDDEN)) {
-            mApplication.getAction("Select sub panel 3").invoke();
-            selectedSubPanel = SUB_PANEL_LAYOUT_DEVICE;
-         } else if (Objects.equals(selectedSubPanel, SUB_PANEL_LAYOUT_DEVICE)) {
-            mApplication.getAction("Select sub panel 1").invoke();
-            selectedSubPanel = SUB_PANEL_LAYOUT_DETAIL;
-         } else if (Objects.equals(selectedSubPanel, SUB_PANEL_LAYOUT_DETAIL)) {
-            mApplication.getAction("Select sub panel 2").invoke();
-            selectedSubPanel = SUB_PANEL_LAYOUT_AUTOMATION;
-         } else if (Objects.equals(selectedSubPanel, SUB_PANEL_LAYOUT_AUTOMATION)) {
-            mApplication.toggleAutomationEditor();
-            selectedSubPanel = SUB_PANEL_HIDDEN;
+         if (mApplication.panelLayout().get().equals(PANEL_LAYOUT_MIX)) {
+            mApplication.setPanelLayout(PANEL_LAYOUT_EDIT);
+         } else {
+            mApplication.setPanelLayout(PANEL_LAYOUT_MIX);
          }
          host.scheduleTask(() -> mDetailEditor.zoomToFit(), ZOOM_TO_FIT_TIMEOUT);
       }, () -> "Next Sub Panel"));
-      mMainLayer.bind(() -> selectedSubPanel.equals(SUB_PANEL_LAYOUT_DEVICE), mClipDeviceViewLed);
+      mMainLayer.bind(() -> mApplication.panelLayout().get().equals(PANEL_LAYOUT_MIX), mClipDeviceViewLed);
 
       // BUTTON 8
       mMainLayer.bindPressed(mDetailViewButton, () -> {
@@ -248,9 +239,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
                slot.select();
                slot.showInEditor();
 
-               mApplication.getAction("Select sub panel 1").invoke();
-               selectedSubPanel = SUB_PANEL_LAYOUT_DETAIL;
-
+               mApplication.setPanelLayout(PANEL_LAYOUT_EDIT);
                host.scheduleTask(() -> mDetailEditor.zoomToFit(), ZOOM_TO_FIT_TIMEOUT);
             });
          }
