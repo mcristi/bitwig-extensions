@@ -3,21 +3,31 @@ package com.bitwig.extensions.controllers.nativeinstruments.komplete;
 import com.bitwig.extension.controller.api.Application;
 import com.bitwig.extension.controller.api.Arranger;
 import com.bitwig.extension.controller.api.Clip;
+import com.bitwig.extension.controller.api.ClipLauncherSlot;
+import com.bitwig.extension.controller.api.ClipLauncherSlotBank;
 import com.bitwig.extension.controller.api.ControllerHost;
 import com.bitwig.extension.controller.api.CursorTrack;
+import com.bitwig.extension.controller.api.HardwareButton;
 import com.bitwig.extension.controller.api.MidiIn;
 import com.bitwig.extension.controller.api.NoteInput;
+import com.bitwig.extension.controller.api.Project;
 import com.bitwig.extension.controller.api.RelativeHardwarControlBindable;
 import com.bitwig.extension.controller.api.RelativeHardwareKnob;
+import com.bitwig.extension.controller.api.Scene;
+import com.bitwig.extension.controller.api.SceneBank;
 import com.bitwig.extension.controller.api.ScrollbarModel;
 import com.bitwig.extension.controller.api.SettableBeatTimeValue;
 import com.bitwig.extension.controller.api.Track;
+import com.bitwig.extension.controller.api.TrackBank;
+import com.bitwig.extension.controller.api.Transport;
+import com.bitwig.extensions.Globals;
 import com.bitwig.extensions.controllers.nativeinstruments.komplete.binding.EncoderParameterBinding;
 import com.bitwig.extensions.controllers.nativeinstruments.komplete.control.ModeButton;
 import com.bitwig.extensions.controllers.nativeinstruments.komplete.definition.AbstractKompleteKontrolExtensionDefinition;
 import com.bitwig.extensions.controllers.nativeinstruments.komplete.device.DeviceControl;
 import com.bitwig.extensions.framework.Layer;
 import com.bitwig.extensions.framework.Layers;
+import com.bitwig.extensions.util.RecordUtils;
 
 public class KontrolSMk3Extension extends KompleteKontrolExtension {
 
@@ -25,6 +35,11 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
     protected ScrollbarModel horizontalScrollbarModel;
     protected double scrubDistance;
     protected Arranger arranger;
+    private MidiIn midiIn2;
+
+    private boolean footswitch1TipPending = false;
+    private boolean footswitch1RingPending = false;
+    private boolean quantizeClipLengthAfterRecord = true;
 
     public KontrolSMk3Extension(final AbstractKompleteKontrolExtensionDefinition definition,
         final ControllerHost host) {
@@ -52,7 +67,7 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
         navigationLayer = new Layer(layers, "NavigationLayer");
         clipSceneCursor = viewControl.getClipSceneCursor();
 
-        final MidiIn midiIn2 = host.getMidiInPort(1);
+        midiIn2 = host.getMidiInPort(1);
         final NoteInput noteInput =
             midiIn2.createNoteInput(
                 "MIDI", "80????", "90????", "A0????", "D0????", "E0????", "B001??", "B00B??", "B040??", "B042??",
@@ -212,6 +227,99 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
         final ModeButton knobShiftPressed = controlElements.getKnobShiftPressed();
         mainLayer.bindPressed(knobPressed.getHwButton(), () -> clipSceneCursor.launch());
         mainLayer.bindPressed(knobShiftPressed.getHwButton(), () -> handle4DShiftPressed(rootTrack, cursorTrack));
+
+        initDigiTechFS3XLooper();
+    }
+
+    private void initDigiTechFS3XLooper() {
+        final int FOOTSWITCH_CHANNEL = 0;
+        final int FOOTSWITCH_CC_TIP = 50;
+        final int FOOTSWITCH_CC_RING = 51;
+        final int FOOTSWITCH_ON_VALUE = 127;
+
+        final int FOOTSWITCH_BINDING_CALLBACK_DELAY = 5;
+
+        final HardwareButton footswitch1ButtonTip = surface.createHardwareButton("FOOTSWITCH_1");
+        footswitch1ButtonTip.pressedAction().setActionMatcher(midiIn2.createCCActionMatcher(FOOTSWITCH_CHANNEL, FOOTSWITCH_CC_TIP, FOOTSWITCH_ON_VALUE));
+        final HardwareButton footswitch1ButtonRing = surface.createHardwareButton("FOOTSWITCH_1_RING");
+        footswitch1ButtonRing.pressedAction().setActionMatcher(midiIn2.createCCActionMatcher(FOOTSWITCH_CHANNEL, FOOTSWITCH_CC_RING, FOOTSWITCH_ON_VALUE));
+
+        final Project project = viewControl.getProject();
+        final Transport transport = viewControl.getTransport();
+        transport.defaultLaunchQuantization().markInterested();
+
+        detailEditor = getHost().createDetailEditor();
+
+        TrackBank trackBank = getHost().createTrackBank(Globals.NUMBER_OF_TRACKS, Globals.NUMBER_OF_SENDS, Globals.NUMBER_OF_SCENES);
+        trackBank.itemCount().markInterested();
+
+        SceneBank sceneBank = trackBank.sceneBank();
+
+        Clip cursorClip = getHost().createLauncherCursorClip(Globals.NUMBER_OF_TRACKS, Globals.NUMBER_OF_SCENES);
+
+        for (int i = 0; i < Globals.NUMBER_OF_SCENES; i++) {
+            final Scene scene = sceneBank.getScene(i);
+            scene.exists().markInterested();
+        }
+
+        for (int i = 0; i < Globals.NUMBER_OF_TRACKS; i++)
+        {
+            final Track track = trackBank.getItemAt(i);
+            track.arm().markInterested();
+            track.trackType().markInterested();
+            track.exists().markInterested();
+            track.isActivated().markInterested();
+
+            final ClipLauncherSlotBank clipLauncher = track.clipLauncherSlotBank();
+
+            for (int j = 0; j < Globals.NUMBER_OF_SCENES; j++)
+            {
+                final ClipLauncherSlot slot = clipLauncher.getItemAt(j);
+                slot.isPlaybackQueued().markInterested();
+                slot.hasContent().markInterested();
+                slot.isPlaying().markInterested();
+                slot.isRecording().markInterested();
+                slot.isRecordingQueued().markInterested();
+                slot.isStopQueued().markInterested();
+                slot.exists().markInterested();
+            }
+        }
+        cursorClip.exists().markInterested();
+        cursorClip.getLoopLength().markInterested();
+        cursorClip.getLoopStart().markInterested();
+        cursorClip.getPlayStart().markInterested();
+        cursorClip.getPlayStop().markInterested();
+
+        mainLayer.bindPressed(footswitch1ButtonTip, () -> {
+            if (footswitch1RingPending) {
+                footswitch1RingPending = false;
+                quantizeClipLengthAfterRecord = !quantizeClipLengthAfterRecord;
+                getHost().showPopupNotification("Quantize Clip Length After Record: " + quantizeClipLengthAfterRecord);
+            } else {
+                footswitch1TipPending = true;
+                getHost().scheduleTask(() -> {
+                    if (footswitch1TipPending) {
+                        footswitch1TipPending = false;
+                        RecordUtils.recordClip(getHost(), application, trackBank, sceneBank, project, detailEditor, transport, cursorClip, quantizeClipLengthAfterRecord);
+                    }
+                }, FOOTSWITCH_BINDING_CALLBACK_DELAY);
+            }
+        });
+        mainLayer.bindPressed(footswitch1ButtonRing, () -> {
+            if (footswitch1TipPending) {
+                footswitch1TipPending = false;
+                quantizeClipLengthAfterRecord = !quantizeClipLengthAfterRecord;
+                getHost().showPopupNotification("Quantize Clip Length After Record: " + quantizeClipLengthAfterRecord);
+            } else {
+                footswitch1RingPending = true;
+                getHost().scheduleTask(() -> {
+                    if (footswitch1RingPending) {
+                        footswitch1RingPending = false;
+                        cursorClip.clipLauncherSlot().deleteObject();
+                    }
+                }, FOOTSWITCH_BINDING_CALLBACK_DELAY);
+            }
+        });
     }
 
     private void handleLeftNavigation() {

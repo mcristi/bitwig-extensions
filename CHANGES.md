@@ -2,7 +2,7 @@
 
 ## Akai APC 40
 
-- USER mode selected by default instead of PAN
+- SENDS mode selected by default instead of PAN
 - Map Track Remotes to DEVICE CONTROL knobs instead of PAN
 
 #### Main layer
@@ -29,7 +29,7 @@
 - `SHIFT + BUTTON 1` - activate track remotes
 - `SHIFT + LED 1` - track remotes are active
 - `SHIFT + BUTTON 2` - activate device remotes
-- `SHIFT + LED 2` - device remotes are active`
+- `SHIFT + LED 2` - device remotes are active
 
 - `BUTTON 6` - pin both track and device
 - `LED 6` - both track and device are pinned
@@ -44,3 +44,4 @@
 ## Komplete Kontrol mk3
 - LAUNCHER mode enabled by default
 - `PLAY` - continue playback
+- Looper for `Assign 1` pedal
