@@ -299,9 +299,9 @@ public abstract class KompleteKontrolExtension extends ControllerExtension {
         mainLayer.bindPressed(controlElements.getSoloSelectedButton(), cursorTrack.solo().toggleAction());
 
         controlElements.getTrackNavLeftButton()
-            .bind(navigationLayer, () -> mixerTrackBank.scrollBy(-8), mixerTrackBank.canScrollChannelsUp());
+            .bind(navigationLayer, () -> mixerTrackBank.scrollBy(-8), mixerTrackBank.canScrollChannelsDown());
         controlElements.getTrackRightNavButton()
-            .bind(navigationLayer, () -> mixerTrackBank.scrollBy(8), mixerTrackBank.canScrollChannelsDown());
+            .bind(navigationLayer, () -> mixerTrackBank.scrollBy(8), mixerTrackBank.canScrollChannelsUp());
 
         for (int i = 0; i < 8; i++) {
             setUpChannelControl(i, mixerTrackBank.getItemAt(i));
@@ -326,7 +326,7 @@ public abstract class KompleteKontrolExtension extends ControllerExtension {
 
         sessionFocusLayer.bindToggle(recButton.getHwButton(), transport.isClipLauncherOverdubEnabled());
         sessionFocusLayer.bindToggle(autoButton.getHwButton(), transport.isClipLauncherAutomationWriteEnabled());
-        sessionFocusLayer.bindToggle(countInButton.getHwButton(), transport.isClipLauncherOverdubEnabled());
+        sessionFocusLayer.bindToggle(countInButton.getHwButton(), viewControl.getCursorTrack().arm());
 
         focusMode.addValueObserver(this::updateFocusMode);
         focusMode.markInterested();
