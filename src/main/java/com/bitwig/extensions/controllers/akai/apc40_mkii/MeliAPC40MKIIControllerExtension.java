@@ -1,32 +1,25 @@
 package com.bitwig.extensions.controllers.akai.apc40_mkii;
 
-import java.util.Objects;
-
 import com.bitwig.extension.api.Color;
 import com.bitwig.extension.controller.ControllerExtensionDefinition;
 import com.bitwig.extension.controller.api.ClipLauncherSlot;
 import com.bitwig.extension.controller.api.ClipLauncherSlotBank;
 import com.bitwig.extension.controller.api.ControllerHost;
 import com.bitwig.extension.controller.api.DetailEditor;
-import com.bitwig.extension.controller.api.HardwareButton;
 import com.bitwig.extension.controller.api.MasterRecorder;
 import com.bitwig.extension.controller.api.Track;
+import com.bitwig.extensions.Globals;
 import com.bitwig.extensions.framework.Layer;
-import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_ARRANGE;
 import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_EDIT;
 import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_MIX;
 
 
 class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
 {
-   private static final int ZOOM_TO_FIT_TIMEOUT = 100;
-   private static final int BT_FOOTSWITCH = 64;
-
    private ControllerHost host;
    private Layer mPanSelectLayer;
    private DetailEditor mDetailEditor;
    private MasterRecorder mMasterRecorder;
-   private HardwareButton footswitchButton;
 
    private final DoublePressedButtonState mPanOn = new DoublePressedButtonState();
 
@@ -108,7 +101,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
          } else {
             mApplication.setPanelLayout(PANEL_LAYOUT_MIX);
          }
-         host.scheduleTask(() -> mDetailEditor.zoomToFit(), ZOOM_TO_FIT_TIMEOUT);
+         host.scheduleTask(() -> mDetailEditor.zoomToFit(), Globals.VISUAL_FEEDBACK_TIMEOUT);
       }, () -> "Next Sub Panel"));
       mMainLayer.bind(() -> mApplication.panelLayout().get().equals(PANEL_LAYOUT_MIX), mClipDeviceViewLed);
 
@@ -240,7 +233,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
                slot.showInEditor();
 
                mApplication.setPanelLayout(PANEL_LAYOUT_EDIT);
-               host.scheduleTask(() -> mDetailEditor.zoomToFit(), ZOOM_TO_FIT_TIMEOUT);
+               host.scheduleTask(() -> mDetailEditor.zoomToFit(), Globals.VISUAL_FEEDBACK_TIMEOUT);
             });
          }
       }
@@ -255,21 +248,5 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
          else
             mPanSelectLayer.deactivate();
       });
-   }
-
-   @Override
-   protected void createHardwareControls()
-   {
-      super.createHardwareControls();
-
-      updateHardwareControls();
-   }
-
-   private void updateHardwareControls()
-   {
-      footswitchButton = mHardwareSurface.createHardwareButton("Footswitch");
-      footswitchButton.setLabel("FS");
-      final int valueWhenPressed = 127;
-      footswitchButton.pressedAction().setActionMatcher(mMidiIn.createCCActionMatcher(0, BT_FOOTSWITCH, valueWhenPressed));
    }
 }

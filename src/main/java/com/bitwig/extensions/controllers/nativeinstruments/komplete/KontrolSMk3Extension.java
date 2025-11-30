@@ -20,6 +20,7 @@ import com.bitwig.extension.controller.api.SettableBeatTimeValue;
 import com.bitwig.extension.controller.api.Track;
 import com.bitwig.extension.controller.api.TrackBank;
 import com.bitwig.extension.controller.api.Transport;
+import com.bitwig.extensions.CommonState;
 import com.bitwig.extensions.Globals;
 import com.bitwig.extensions.controllers.nativeinstruments.komplete.binding.EncoderParameterBinding;
 import com.bitwig.extensions.controllers.nativeinstruments.komplete.control.ModeButton;
@@ -27,6 +28,7 @@ import com.bitwig.extensions.controllers.nativeinstruments.komplete.definition.A
 import com.bitwig.extensions.controllers.nativeinstruments.komplete.device.DeviceControl;
 import com.bitwig.extensions.framework.Layer;
 import com.bitwig.extensions.framework.Layers;
+import com.bitwig.extensions.util.ClipUtils;
 import com.bitwig.extensions.util.RecordUtils;
 
 public class KontrolSMk3Extension extends KompleteKontrolExtension {
@@ -39,7 +41,6 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
 
     private boolean footswitch1TipPending = false;
     private boolean footswitch1RingPending = false;
-    private boolean quantizeClipLengthAfterRecord = true;
 
     public KontrolSMk3Extension(final AbstractKompleteKontrolExtensionDefinition definition,
         final ControllerHost host) {
@@ -293,14 +294,13 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
         mainLayer.bindPressed(footswitch1ButtonTip, () -> {
             if (footswitch1RingPending) {
                 footswitch1RingPending = false;
-                quantizeClipLengthAfterRecord = !quantizeClipLengthAfterRecord;
-                getHost().showPopupNotification("Quantize Clip Length After Record: " + quantizeClipLengthAfterRecord);
+                transport.resetAutomationOverrides();
             } else {
                 footswitch1TipPending = true;
                 getHost().scheduleTask(() -> {
                     if (footswitch1TipPending) {
                         footswitch1TipPending = false;
-                        RecordUtils.recordClip(getHost(), application, trackBank, sceneBank, project, detailEditor, transport, cursorClip, quantizeClipLengthAfterRecord);
+                        RecordUtils.recordClip(getHost(), application, trackBank, sceneBank, project, detailEditor, transport, cursorClip, CommonState.getInstance().isQuantizeClipLengthAfterRecord());
                     }
                 }, FOOTSWITCH_BINDING_CALLBACK_DELAY);
             }
@@ -308,14 +308,13 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
         mainLayer.bindPressed(footswitch1ButtonRing, () -> {
             if (footswitch1TipPending) {
                 footswitch1TipPending = false;
-                quantizeClipLengthAfterRecord = !quantizeClipLengthAfterRecord;
-                getHost().showPopupNotification("Quantize Clip Length After Record: " + quantizeClipLengthAfterRecord);
+                transport.resetAutomationOverrides();
             } else {
                 footswitch1RingPending = true;
                 getHost().scheduleTask(() -> {
                     if (footswitch1RingPending) {
                         footswitch1RingPending = false;
-                        cursorClip.clipLauncherSlot().deleteObject();
+                        ClipUtils.delete(application, cursorClip);
                     }
                 }, FOOTSWITCH_BINDING_CALLBACK_DELAY);
             }

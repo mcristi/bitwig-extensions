@@ -20,6 +20,7 @@ import com.bitwig.extension.controller.api.SourceSelector;
 import com.bitwig.extension.controller.api.Track;
 import com.bitwig.extension.controller.api.TrackBank;
 import com.bitwig.extension.controller.api.Transport;
+import com.bitwig.extensions.CommonState;
 import com.bitwig.extensions.Globals;
 import com.bitwig.extensions.util.ApplicationUtils;
 import com.bitwig.extensions.util.ClipUtils;
@@ -57,7 +58,6 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
     }
     private ExpressionMode expressionMode = ExpressionMode.VOLUME;
     private boolean openWindowOnArm = true;
-    private boolean quantizeClipLengthAfterRecord = true;
 
     // API objects
     private ControllerHost host;
@@ -229,8 +229,8 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
 
             case B4:
                 if (data2 == 50) {
-                    this.quantizeClipLengthAfterRecord = !this.quantizeClipLengthAfterRecord;
-                    host.showPopupNotification("Quantize Clip Length After Record: " + this.quantizeClipLengthAfterRecord);
+                    CommonState.getInstance().toggleQuantizeClipLengthAfterRecord();
+                    host.showPopupNotification("Quantize Clip Length After Record: " + CommonState.getInstance().isQuantizeClipLengthAfterRecord());
                     break;
                 }
 
@@ -306,12 +306,12 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
 
             case BD:
                 if (data2 == OFF) {
-                    RecordUtils.recordClip(host, application, trackBank, sceneBank, project, detailEditor, transport, cursorClip, quantizeClipLengthAfterRecord);
+                    RecordUtils.recordClip(host, application, trackBank, sceneBank, project, detailEditor, transport, cursorClip, CommonState.getInstance().isQuantizeClipLengthAfterRecord());
                 }
                 break;
             case BD_LONG:
                 if (data2 == OFF) {
-                    ClipUtils.delete(cursorClip);
+                    ClipUtils.delete(application, cursorClip);
                 }
                 break;
 
