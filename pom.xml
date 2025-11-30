@@ -46,7 +46,7 @@
                         </goals>
                         <configuration>
                             <sourceFile>${project.build.directory}/${project.build.finalName}.jar</sourceFile>
-                            <destinationFile>/Users/meli/Documents/Bitwig Studio/Extensions/APCbyMeli.bwextension</destinationFile>
+                            <destinationFile>/Users/meli/Documents/Bitwig Studio/Extensions/bitwig-extensions-by-meli.bwextension</destinationFile>
                         </configuration>
                     </execution>
                 </executions>
