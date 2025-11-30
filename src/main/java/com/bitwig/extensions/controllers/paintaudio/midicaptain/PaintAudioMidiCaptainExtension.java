@@ -317,12 +317,12 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
 
             case UP:
                 if (data2 == OFF) {
-                    SceneUtils.launchPrev(sceneBank, trackBank);
+                    SceneUtils.launchPrev(application, sceneBank, trackBank);
                 }
                 break;
             case DOWN:
                 if (data2 == OFF) {
-                    SceneUtils.launchNext(sceneBank, trackBank);
+                    SceneUtils.launchNext(application, sceneBank, trackBank);
                 }
                 break;
 
