@@ -1,0 +1,658 @@
+{
+    "color": "Orange",
+    "hide_template_name": false,
+    "image_data": "",
+    "keyboard_assignments": [
+        {
+            "color": "",
+            "disable": false,
+            "midi_channel": 0,
+            "priority": "plugin",
+            "semitones_transpose": 0,
+            "upper_key": 127,
+            "velocity_curve": null
+        }
+    ],
+    "midi_output_preference": null,
+    "pages": [
+        {
+            "buttons": [
+                {
+                    "color": "Red",
+                    "custom_label": true,
+                    "label": "Low OFF",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 112,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "toggle": {
+                                "off": 0,
+                                "on": 127
+                            }
+                        }
+                    }
+                },
+                {
+                    "color": "Red",
+                    "custom_label": true,
+                    "label": "Mute Kick",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 113,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "toggle": {
+                                "off": 0,
+                                "on": 127
+                            }
+                        }
+                    }
+                },
+                {
+                    "color": "Turquoise",
+                    "custom_label": true,
+                    "label": "DL freeze",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 114,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "toggle": {
+                                "off": 0,
+                                "on": 127
+                            }
+                        }
+                    }
+                },
+                {
+                    "color": "White",
+                    "custom_label": true,
+                    "label": "1/2",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 115,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "toggle": {
+                                "off": 0,
+                                "on": 127
+                            }
+                        }
+                    }
+                },
+                {
+                    "color": "White",
+                    "custom_label": true,
+                    "label": "1/4",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 116,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "toggle": {
+                                "off": 0,
+                                "on": 127
+                            }
+                        }
+                    }
+                },
+                {
+                    "color": "White",
+                    "custom_label": true,
+                    "label": "1/8",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 117,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "toggle": {
+                                "off": 0,
+                                "on": 127
+                            }
+                        }
+                    }
+                },
+                {
+                    "color": "White",
+                    "custom_label": true,
+                    "label": "1/16",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 118,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "toggle": {
+                                "off": 0,
+                                "on": 127
+                            }
+                        }
+                    }
+                },
+                {
+                    "color": "Lime",
+                    "custom_label": true,
+                    "label": "RST macros",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 119,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "toggle": {
+                                "off": 0,
+                                "on": 127
+                            }
+                        }
+                    }
+                }
+            ],
+            "knobs": [
+                {
+                    "custom_label": true,
+                    "display_mode": "bipolar_int",
+                    "label": "HH decay",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 14,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "absolute": {
+                                "max": 127,
+                                "min": 0
+                            }
+                        }
+                    }
+                },
+                {
+                    "custom_label": true,
+                    "display_mode": "unipolar_int",
+                    "label": "snare >DL",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 15,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "absolute": {
+                                "max": 127,
+                                "min": 0
+                            }
+                        }
+                    }
+                },
+                {
+                    "custom_label": true,
+                    "display_mode": "unipolar_int",
+                    "label": "DL duck",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 16,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "absolute": {
+                                "max": 127,
+                                "min": 0
+                            }
+                        }
+                    }
+                },
+                {
+                    "custom_label": true,
+                    "display_mode": "unipolar_int",
+                    "label": ">RV ms",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 17,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "absolute": {
+                                "max": 127,
+                                "min": 0
+                            }
+                        }
+                    }
+                },
+                null,
+                {
+                    "custom_label": true,
+                    "display_mode": "unipolar_int",
+                    "label": "macro 6",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 19,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "absolute": {
+                                "max": 127,
+                                "min": 0
+                            }
+                        }
+                    }
+                },
+                {
+                    "custom_label": true,
+                    "display_mode": "unipolar_int",
+                    "label": "macro 7",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 20,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "absolute": {
+                                "max": 127,
+                                "min": 0
+                            }
+                        }
+                    }
+                },
+                {
+                    "custom_label": true,
+                    "display_mode": "unipolar_int",
+                    "label": "macro 8",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 21,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "absolute": {
+                                "max": 127,
+                                "min": 0
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "buttons": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                {
+                    "color": "White",
+                    "custom_label": false,
+                    "label": "CC 103",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 103,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "toggle": {
+                                "off": 0,
+                                "on": 127
+                            }
+                        }
+                    }
+                }
+            ],
+            "knobs": [
+                {
+                    "custom_label": true,
+                    "display_mode": "unipolar_int",
+                    "label": ">DL beats",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 30,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "absolute": {
+                                "max": 127,
+                                "min": 0
+                            }
+                        }
+                    }
+                },
+                {
+                    "custom_label": true,
+                    "display_mode": "unipolar_int",
+                    "label": ">DL fdbck",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 31,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "absolute": {
+                                "max": 127,
+                                "min": 0
+                            }
+                        }
+                    }
+                },
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ]
+        },
+        {
+            "buttons": [
+                null,
+                null,
+                null,
+                {
+                    "color": "White",
+                    "custom_label": true,
+                    "label": "Groove ON",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 107,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "toggle": {
+                                "off": 0,
+                                "on": 127
+                            }
+                        }
+                    }
+                },
+                null,
+                null,
+                null,
+                null
+            ],
+            "knobs": [
+                {
+                    "custom_label": true,
+                    "display_mode": "unipolar_int",
+                    "label": "Shuffle",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 22,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "absolute": {
+                                "max": 127,
+                                "min": 0
+                            }
+                        }
+                    }
+                },
+                {
+                    "custom_label": true,
+                    "display_mode": "unipolar_int",
+                    "label": "Sh Rate",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 23,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "absolute": {
+                                "max": 124,
+                                "min": 0
+                            }
+                        }
+                    }
+                },
+                {
+                    "custom_label": true,
+                    "display_mode": "unipolar_int",
+                    "label": "Accent",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 24,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "absolute": {
+                                "max": 127,
+                                "min": 0
+                            }
+                        }
+                    }
+                },
+                {
+                    "custom_label": true,
+                    "display_mode": "unipolar_int",
+                    "label": "Ac Phase",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 25,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "absolute": {
+                                "max": 127,
+                                "min": 0
+                            }
+                        }
+                    }
+                },
+                {
+                    "custom_label": true,
+                    "display_mode": "unipolar_int",
+                    "label": "Ac Rate",
+                    "mapping": {
+                        "assignment": {
+                            "cc": {
+                                "midi_cc_number": 26,
+                                "midi_channel": 0
+                            }
+                        },
+                        "behaviour": {
+                            "absolute": {
+                                "max": 127,
+                                "min": 0
+                            }
+                        }
+                    }
+                },
+                null,
+                null,
+                null
+            ]
+        }
+    ],
+    "pedal_assignments": {
+        "PedalAssign1": {
+            "pedal_switch_configuration": {
+                "configuration": {
+                    "invert": true
+                },
+                "mapping_ring": {
+                    "assignment": {
+                        "cc": {
+                            "midi_cc_number": 51,
+                            "midi_channel": 0
+                        }
+                    },
+                    "behaviour": {
+                        "gate": {
+                            "off": 0,
+                            "on": 127
+                        }
+                    }
+                },
+                "mapping_tip": {
+                    "assignment": {
+                        "cc": {
+                            "midi_cc_number": 50,
+                            "midi_channel": 0
+                        }
+                    },
+                    "behaviour": {
+                        "gate": {
+                            "off": 0,
+                            "on": 127
+                        }
+                    }
+                }
+            }
+        },
+        "PedalAssign2": null,
+        "PedalExpression": {
+            "pedal_continuous_configuration": {
+                "configuration": {
+                    "invert": false,
+                    "swap_tip_ring": false
+                },
+                "mapping": {
+                    "assignment": {
+                        "cc": {
+                            "midi_cc_number": 11,
+                            "midi_channel": 0
+                        }
+                    },
+                    "behaviour": {
+                        "range": {
+                            "max": 127,
+                            "min": 0
+                        }
+                    }
+                }
+            }
+        },
+        "PedalSustain": {
+            "pedal_switch_configuration": {
+                "configuration": {
+                    "invert": false
+                },
+                "mapping_ring": {
+                    "assignment": {
+                        "cc": {
+                            "midi_cc_number": 65,
+                            "midi_channel": 0
+                        }
+                    },
+                    "behaviour": {
+                        "gate": {
+                            "off": 0,
+                            "on": 127
+                        }
+                    }
+                },
+                "mapping_tip": {
+                    "assignment": {
+                        "cc": {
+                            "midi_cc_number": 64,
+                            "midi_channel": 0
+                        }
+                    },
+                    "behaviour": {
+                        "gate": {
+                            "off": 0,
+                            "on": 127
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "template_name": "Bitwig",
+    "touchstrip_assignments": {
+        "TouchStrip": {
+            "assignment": {
+                "cc": {
+                    "midi_cc_number": 2,
+                    "midi_channel": 1
+                }
+            },
+            "behaviour": {
+                "range": {
+                    "max": 127,
+                    "min": 0
+                }
+            }
+        }
+    },
+    "wheel_assignments": {
+        "Modulation": {
+            "assignment": {
+                "cc": {
+                    "midi_cc_number": 1,
+                    "midi_channel": 0
+                }
+            },
+            "behaviour": {
+                "range": {
+                    "max": 127,
+                    "min": 0
+                }
+            }
+        },
+        "Pitchbend": {
+            "assignment": {
+                "pitch_bend": {
+                    "midi_channel": 0
+                }
+            },
+            "behaviour": {
+                "range": {
+                    "max": 16383,
+                    "min": 0
+                }
+            }
+        }
+    }
+}
