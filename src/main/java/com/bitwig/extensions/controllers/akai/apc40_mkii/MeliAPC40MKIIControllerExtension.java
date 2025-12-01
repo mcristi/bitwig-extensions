@@ -84,15 +84,15 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
 
       // BUTTON 6
       mMainLayer.bindPressed(mDeviceLockButton, getHost().createAction(() -> {
-         if (mDeviceCursor.isPinned().get() || mTrackCursor.isPinned().get()) {
+         if (mDeviceCursor.isPinned().get() && mPinnableTrackCursor.isPinned().get()) {
             mDeviceCursor.isPinned().set(false);
-            mTrackCursor.isPinned().set(false);
+            mPinnableTrackCursor.isPinned().set(false);
          } else {
             mDeviceCursor.isPinned().set(true);
-            mTrackCursor.isPinned().set(true);
+            mPinnableTrackCursor.isPinned().set(true);
          }
       }, () -> "Toggle device & track pin"));
-      mMainLayer.bind(() -> mDeviceCursor.isPinned().get() && mTrackCursor.isPinned().get(), mDeviceLockLed);
+      mMainLayer.bind(() -> mDeviceCursor.isPinned().get() && mPinnableTrackCursor.isPinned().get(), mDeviceLockLed);
 
       // BUTTON 7
       mMainLayer.bindPressed(mClipDeviceViewButton, getHost().createAction(() -> {
@@ -125,18 +125,6 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
          if (mTrackCursor.isGroup().get())
             mApplication.navigateIntoTrackGroup(mTrackCursor);
       });
-
-      // BUTTON 1
-      mShiftLayer.bindPressed(mPrevDeviceButton, () -> {
-         activateDeviceControlsMode(DeviceControlMode.TRACK_CONTROLS);
-      });
-      mShiftLayer.bind(() -> mDeviceControlMode == DeviceControlMode.TRACK_CONTROLS, mPrevDeviceLed);
-
-      // BUTTON 2
-      mShiftLayer.bindPressed(mNextDeviceButton, () -> {
-         activateDeviceControlsMode(DeviceControlMode.DEVICE_CONTROLS);
-      });
-      mShiftLayer.bind(() -> mDeviceControlMode == DeviceControlMode.DEVICE_CONTROLS, mNextDeviceLed);
 
       // button 7
       mShiftLayer.bindPressed(mClipDeviceViewButton, () -> {

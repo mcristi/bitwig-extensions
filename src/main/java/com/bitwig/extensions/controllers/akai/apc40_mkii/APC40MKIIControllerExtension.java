@@ -49,11 +49,6 @@ class APC40MKIIControllerExtension extends ControllerExtension
       PAN, SENDS, PROJECT_CONTROLS
    }
 
-   protected enum DeviceControlMode
-   {
-      TRACK_CONTROLS, DEVICE_CONTROLS
-   }
-
    private static final int MSG_NOTE_ON = 9;
 
    private static final int MSG_NOTE_OFF = 8;
@@ -163,7 +158,9 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mApplication = host.createApplication();
       mProject = host.getProject();
       mRootTrackGroup = mProject.getRootTrackGroup();
+
       mProjectRemoteControls = mRootTrackGroup.createCursorRemoteControlsPage("project-remotes", 8, null);
+      mProjectRemoteControls.setHardwareLayout(HardwareControlType.KNOB, 8);
       mProjectRemoteControls.selectedPageIndex().markInterested();
       mProjectRemoteControls.pageCount().markInterested();
       for (int i = 0; i < 8; ++i)
@@ -179,11 +176,15 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mMasterTrack = host.createMasterTrack(5);
       mMasterTrack.isStopped().markInterested();
 
-      mTrackCursor = host.createCursorTrack("cursor-track", "Akai APC40 mkII", 8, 0, true);
+      mTrackCursor = host.createCursorTrack("cursor-track", "Select Cursor Track", 8, 0, true);
       mTrackCursor.exists().markInterested();
       mTrackCursor.isGroup().markInterested();
       mTrackCursor.volume().markInterested();
       mTrackCursor.pan().markInterested();
+
+      mPinnableTrackCursor = host.createCursorTrack("pinnable-cursor-track", "Pinable Cursor Track", 8, 0, true);
+      mPinnableTrackCursor.exists().markInterested();
+      mPinnableTrackCursor.isPinned().markInterested();
 
       for (int i = 0; i < 8; ++i)
       {
@@ -197,27 +198,19 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
       mIsMasterSelected = mTrackCursor.createEqualsValue(mMasterTrack);
 
-      final PinnableCursorDevice channelStripDevice = mTrackCursor.createCursorDevice("channel-strip",
-         "Channel Strip", 4, CursorDeviceFollowMode.LAST_DEVICE);
-      channelStripDevice.exists().markInterested();
-      mChannelStripRemoteControls = channelStripDevice.createCursorRemoteControlsPage(8);
-      mChannelStripRemoteControls.setHardwareLayout(HardwareControlType.KNOB, 8);
-
-      mTrackRemoteControls = mTrackCursor.createCursorRemoteControlsPage("track-remotes", 8, null);
-
-      mDeviceCursor = mTrackCursor.createCursorDevice("device-control", "Device Control", 0,
-         CursorDeviceFollowMode.FOLLOW_SELECTION);
+      mDeviceCursor = mPinnableTrackCursor.createCursorDevice("device-cursor", "Device Cursor", 0, CursorDeviceFollowMode.FOLLOW_SELECTION);
       mDeviceCursor.isEnabled().markInterested();
       mDeviceCursor.isPinned().markInterested();
       mDeviceCursor.hasNext().markInterested();
       mDeviceCursor.hasPrevious().markInterested();
       mDeviceCursor.isWindowOpen().markInterested();
       mDeviceCursor.exists().markInterested();
-      mRemoteControls = mDeviceCursor.createCursorRemoteControlsPage(8);
-      mRemoteControls.hasNext().markInterested();
-      mRemoteControls.hasPrevious().markInterested();
-      mRemoteControls.selectedPageIndex().markInterested();
-      mRemoteControls.setHardwareLayout(HardwareControlType.KNOB, 4);
+
+      mDeviceRemoteControls = mDeviceCursor.createCursorRemoteControlsPage(8);
+      mDeviceRemoteControls.setHardwareLayout(HardwareControlType.KNOB, 4);
+      mDeviceRemoteControls.hasNext().markInterested();
+      mDeviceRemoteControls.hasPrevious().markInterested();
+      mDeviceRemoteControls.selectedPageIndex().markInterested();
 
       mTrackBank = host.createTrackBank(8, 5, 5, false);
       mTrackBank.setSkipDisabledItems(true);
@@ -237,15 +230,6 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
       for (int i = 0; i < 8; ++i)
       {
-         final RemoteControl channelStripRemoteControlsParameter = mChannelStripRemoteControls
-            .getParameter(i);
-         channelStripRemoteControlsParameter.markInterested();
-         channelStripRemoteControlsParameter.exists().markInterested();
-
-         final RemoteControl trackRemote = mTrackRemoteControls.getParameter(i);
-         trackRemote.markInterested();
-         trackRemote.exists().markInterested();
-
          final Track track = mTrackBank.getItemAt(i);
          final SendBank sendBank = track.sendBank();
          sendBank.setSkipDisabledItems(true);
@@ -281,7 +265,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
          mIsTrackSelected[i] = mTrackCursor.createEqualsValue(track);
          mIsTrackSelected[i].markInterested();
 
-         final RemoteControl parameter = mRemoteControls.getParameter(i);
+         final RemoteControl parameter = mDeviceRemoteControls.getParameter(i);
          parameter.markInterested();
          parameter.exists().markInterested();
 
@@ -329,10 +313,6 @@ class APC40MKIIControllerExtension extends ControllerExtension
    private void createSettingsObjects(final ControllerHost host)
    {
       final Preferences preferences = host.getPreferences();
-      mTrackRemoteSetting = preferences.getBooleanSetting("Replace Device Remotes by Track Remotes", "Controls",
-         false);
-      mTrackRemoteSetting.markInterested();
-
       mHorizontalScrollByPageSetting = preferences.getBooleanSetting("Scroll by page (Horizontal)",
          "Clip Launcher", false);
       mHorizontalScrollByPageSetting.markInterested();
@@ -340,18 +320,10 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mVerticalScrollByPageSetting = preferences.getBooleanSetting("Scroll by page (Vertical)",
          "Clip Launcher", false);
       mVerticalScrollByPageSetting.markInterested();
-
-      mControlSendEffectSetting = preferences.getBooleanSetting("FX Control when latched", "Sends", true);
-      mControlSendEffectSetting.markInterested();
    }
 
    private void postInit()
    {
-      if (mTrackRemoteSetting.get())
-         activateDeviceControlsMode(DeviceControlMode.TRACK_CONTROLS);
-      else
-         activateDeviceControlsMode(DeviceControlMode.DEVICE_CONTROLS);
-
       activateTopMode(TopMode.SENDS);
    }
 
@@ -360,7 +332,6 @@ class APC40MKIIControllerExtension extends ControllerExtension
       // We create all the layers here because the main layer might bind actions to activate other layers.
       mLayers = new Layers(this);
       mMainLayer = new Layer(mLayers, "Main");
-      mTrackRemoteControlsLayer = new Layer(mLayers, "TrackRemoteControls");
       mProjectRemoteControlsLayer = new Layer(mLayers, "ProjectRemoteControls");
       mShiftLayer = new Layer(mLayers, "Shift");
       mBankLayer = new Layer(mLayers, "Bank");
@@ -371,7 +342,6 @@ class APC40MKIIControllerExtension extends ControllerExtension
       createPanLayer();
       createDebugLayer();
       createSendLayers();
-      createTrackRemotesControlLayer();
       createProjectRemotesControlsLayer();
       createShiftLayer();
       createBankLayer();
@@ -407,30 +377,30 @@ class APC40MKIIControllerExtension extends ControllerExtension
    private void createBankLayer()
    {
       mBankLayer.bindPressed(mPrevDeviceButton, getHost().createAction(
-         () -> mRemoteControls.selectedPageIndex().set(0), () -> "Select Remote Controls Page 1"));
+         () -> mDeviceRemoteControls.selectedPageIndex().set(0), () -> "Select Remote Controls Page 1"));
       mBankLayer.bindPressed(mNextDeviceButton, getHost().createAction(
-         () -> mRemoteControls.selectedPageIndex().set(1), () -> "Select Remote Controls Page 2"));
+         () -> mDeviceRemoteControls.selectedPageIndex().set(1), () -> "Select Remote Controls Page 2"));
       mBankLayer.bindPressed(mPrevBankButton, getHost().createAction(
-         () -> mRemoteControls.selectedPageIndex().set(2), () -> "Select Remote Controls Page 3"));
+         () -> mDeviceRemoteControls.selectedPageIndex().set(2), () -> "Select Remote Controls Page 3"));
       mBankLayer.bindPressed(mNextBankButton, getHost().createAction(
-         () -> mRemoteControls.selectedPageIndex().set(3), () -> "Select Remote Controls Page 4"));
+         () -> mDeviceRemoteControls.selectedPageIndex().set(3), () -> "Select Remote Controls Page 4"));
       mBankLayer.bindPressed(mDeviceOnOffButton, getHost().createAction(
-         () -> mRemoteControls.selectedPageIndex().set(4), () -> "Select Remote Controls Page 5"));
+         () -> mDeviceRemoteControls.selectedPageIndex().set(4), () -> "Select Remote Controls Page 5"));
       mBankLayer.bindPressed(mDeviceLockButton, getHost().createAction(
-         () -> mRemoteControls.selectedPageIndex().set(5), () -> "Select Remote Controls Page 6"));
+         () -> mDeviceRemoteControls.selectedPageIndex().set(5), () -> "Select Remote Controls Page 6"));
       mBankLayer.bindPressed(mClipDeviceViewButton, getHost().createAction(
-         () -> mRemoteControls.selectedPageIndex().set(6), () -> "Select Remote Controls Page 7"));
+         () -> mDeviceRemoteControls.selectedPageIndex().set(6), () -> "Select Remote Controls Page 7"));
       mBankLayer.bindPressed(mDetailViewButton, getHost().createAction(
-         () -> mRemoteControls.selectedPageIndex().set(7), () -> "Select Remote Controls Page 8"));
+         () -> mDeviceRemoteControls.selectedPageIndex().set(7), () -> "Select Remote Controls Page 8"));
 
-      mBankLayer.bind(() -> mRemoteControls.selectedPageIndex().get() == 0, mPrevDeviceLed);
-      mBankLayer.bind(() -> mRemoteControls.selectedPageIndex().get() == 1, mNextDeviceLed);
-      mBankLayer.bind(() -> mRemoteControls.selectedPageIndex().get() == 2, mPrevBankLed);
-      mBankLayer.bind(() -> mRemoteControls.selectedPageIndex().get() == 3, mNextBankLed);
-      mBankLayer.bind(() -> mRemoteControls.selectedPageIndex().get() == 4, mDeviceOnOffLed);
-      mBankLayer.bind(() -> mRemoteControls.selectedPageIndex().get() == 5, mDeviceLockLed);
-      mBankLayer.bind(() -> mRemoteControls.selectedPageIndex().get() == 6, mClipDeviceViewLed);
-      mBankLayer.bind(() -> mRemoteControls.selectedPageIndex().get() == 7, mDetailViewLed);
+      mBankLayer.bind(() -> mDeviceRemoteControls.selectedPageIndex().get() == 0, mPrevDeviceLed);
+      mBankLayer.bind(() -> mDeviceRemoteControls.selectedPageIndex().get() == 1, mNextDeviceLed);
+      mBankLayer.bind(() -> mDeviceRemoteControls.selectedPageIndex().get() == 2, mPrevBankLed);
+      mBankLayer.bind(() -> mDeviceRemoteControls.selectedPageIndex().get() == 3, mNextBankLed);
+      mBankLayer.bind(() -> mDeviceRemoteControls.selectedPageIndex().get() == 4, mDeviceOnOffLed);
+      mBankLayer.bind(() -> mDeviceRemoteControls.selectedPageIndex().get() == 5, mDeviceLockLed);
+      mBankLayer.bind(() -> mDeviceRemoteControls.selectedPageIndex().get() == 6, mClipDeviceViewLed);
+      mBankLayer.bind(() -> mDeviceRemoteControls.selectedPageIndex().get() == 7, mDetailViewLed);
    }
 
    private void createShiftLayer()
@@ -485,12 +455,6 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mTransport.defaultLaunchQuantization().set(quantization);
    }
 
-   private void createTrackRemotesControlLayer()
-   {
-      for (int i = 0; i < 8; ++i)
-         mTrackRemoteControlsLayer.bind(mDeviceControlKnobs[i], mTrackRemoteControls.getParameter(i));
-   }
-
    private void createProjectRemotesControlsLayer()
    {
       for (int i = 0; i < 8; ++i)
@@ -530,7 +494,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
    {
       for (int i = 0; i < 8; ++i)
       {
-         mMainLayer.bind(mDeviceControlKnobs[i], mRemoteControls.getParameter(i));
+         mMainLayer.bind(mDeviceControlKnobs[i], mDeviceRemoteControls.getParameter(i));
          mMainLayer.bind(mTrackVolumeSliders[i], mTrackBank.getItemAt(i).volume());
       }
 
@@ -592,11 +556,11 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mMainLayer.bindPressed(mPrevDeviceButton, mDeviceCursor.selectPreviousAction());
       mMainLayer.bind(mDeviceCursor.hasPrevious(), mPrevDeviceLed);
 
-      mMainLayer.bindPressed(mNextBankButton, mRemoteControls.selectNextAction());
-      mMainLayer.bind(mRemoteControls.hasNext(), mNextBankLed);
+      mMainLayer.bindPressed(mNextBankButton, mDeviceRemoteControls.selectNextAction());
+      mMainLayer.bind(mDeviceRemoteControls.hasNext(), mNextBankLed);
 
-      mMainLayer.bindPressed(mPrevBankButton, mRemoteControls.selectPreviousAction());
-      mMainLayer.bind(mRemoteControls.hasPrevious(), mPrevBankLed);
+      mMainLayer.bindPressed(mPrevBankButton, mDeviceRemoteControls.selectPreviousAction());
+      mMainLayer.bind(mDeviceRemoteControls.hasPrevious(), mPrevBankLed);
 
       mMainLayer.bindToggle(mDeviceOnOffButton, mDeviceCursor.isEnabled());
       mMainLayer.bind(mDeviceCursor.isEnabled(), mDeviceOnOffLed);
@@ -1440,14 +1404,8 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mSendsLed.isOn().setValue(topMode == TopMode.SENDS);
       mUserLed.isOn().setValue(topMode == TopMode.PROJECT_CONTROLS);
 
-      if (topMode == TopMode.SENDS && mControlSendEffectSetting.get() && mShiftButton.isPressed().get())
+      if (topMode == TopMode.SENDS && mShiftButton.isPressed().get())
          mTrackCursor.selectChannel(mSendTrackBank.getItemAt(mSendIndex));
-   }
-
-   protected void activateDeviceControlsMode(final DeviceControlMode deviceControlMode)
-   {
-      mDeviceControlMode = deviceControlMode;
-      mTrackRemoteControlsLayer.setIsActive(mDeviceControlMode == DeviceControlMode.TRACK_CONTROLS);
    }
 
    private void onSysexIn(final String sysex)
@@ -1632,16 +1590,12 @@ class APC40MKIIControllerExtension extends ControllerExtension
    private SceneBank mSceneBank = null;
 
    protected CursorTrack mTrackCursor = null;
+   protected CursorTrack mPinnableTrackCursor = null;
 
    protected PinnableCursorDevice mDeviceCursor = null;
 
-   protected CursorRemoteControlsPage mRemoteControls = null;
-
-   protected CursorRemoteControlsPage mChannelStripRemoteControls;
-
-   protected CursorRemoteControlsPage mTrackRemoteControls;
-
-   private CursorRemoteControlsPage mProjectRemoteControls;
+   protected CursorRemoteControlsPage mDeviceRemoteControls = null;
+   protected CursorRemoteControlsPage mProjectRemoteControls = null;
 
    protected MidiIn mMidiIn = null;
 
@@ -1651,13 +1605,9 @@ class APC40MKIIControllerExtension extends ControllerExtension
    // Settings //
    //////////////
 
-   private SettableBooleanValue mTrackRemoteSetting;
-
    private SettableBooleanValue mHorizontalScrollByPageSetting;
 
    private SettableBooleanValue mVerticalScrollByPageSetting;
-
-   private SettableBooleanValue mControlSendEffectSetting;
 
    ///////////
    // State //
@@ -1670,7 +1620,6 @@ class APC40MKIIControllerExtension extends ControllerExtension
    private final DoublePressedButtonState mSendsOn = new DoublePressedButtonState();
 
    private TopMode mTopMode = TopMode.PAN;
-   protected DeviceControlMode mDeviceControlMode = DeviceControlMode.DEVICE_CONTROLS;
 
    private int mSendIndex = 0; // 0..4
 
@@ -1685,8 +1634,6 @@ class APC40MKIIControllerExtension extends ControllerExtension
    private Layer mPanLayer;
 
    private Layer[] mSendLayers;
-
-   private Layer mTrackRemoteControlsLayer;
 
    private Layer mProjectRemoteControlsLayer;
 
