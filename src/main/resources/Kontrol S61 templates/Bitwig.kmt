@@ -247,96 +247,6 @@
                         }
                     }
                 },
-                null,
-                {
-                    "custom_label": true,
-                    "display_mode": "unipolar_int",
-                    "label": "macro 6",
-                    "mapping": {
-                        "assignment": {
-                            "cc": {
-                                "midi_cc_number": 19,
-                                "midi_channel": 0
-                            }
-                        },
-                        "behaviour": {
-                            "absolute": {
-                                "max": 127,
-                                "min": 0
-                            }
-                        }
-                    }
-                },
-                {
-                    "custom_label": true,
-                    "display_mode": "unipolar_int",
-                    "label": "macro 7",
-                    "mapping": {
-                        "assignment": {
-                            "cc": {
-                                "midi_cc_number": 20,
-                                "midi_channel": 0
-                            }
-                        },
-                        "behaviour": {
-                            "absolute": {
-                                "max": 127,
-                                "min": 0
-                            }
-                        }
-                    }
-                },
-                {
-                    "custom_label": true,
-                    "display_mode": "unipolar_int",
-                    "label": "macro 8",
-                    "mapping": {
-                        "assignment": {
-                            "cc": {
-                                "midi_cc_number": 21,
-                                "midi_channel": 0
-                            }
-                        },
-                        "behaviour": {
-                            "absolute": {
-                                "max": 127,
-                                "min": 0
-                            }
-                        }
-                    }
-                }
-            ]
-        },
-        {
-            "buttons": [
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                {
-                    "color": "White",
-                    "custom_label": false,
-                    "label": "CC 103",
-                    "mapping": {
-                        "assignment": {
-                            "cc": {
-                                "midi_cc_number": 103,
-                                "midi_channel": 0
-                            }
-                        },
-                        "behaviour": {
-                            "toggle": {
-                                "off": 0,
-                                "on": 127
-                            }
-                        }
-                    }
-                }
-            ],
-            "knobs": [
                 {
                     "custom_label": true,
                     "display_mode": "unipolar_int",
@@ -344,7 +254,7 @@
                     "mapping": {
                         "assignment": {
                             "cc": {
-                                "midi_cc_number": 30,
+                                "midi_cc_number": 18,
                                 "midi_channel": 0
                             }
                         },
@@ -363,7 +273,7 @@
                     "mapping": {
                         "assignment": {
                             "cc": {
-                                "midi_cc_number": 31,
+                                "midi_cc_number": 19,
                                 "midi_channel": 0
                             }
                         },
@@ -375,10 +285,6 @@
                         }
                     }
                 },
-                null,
-                null,
-                null,
-                null,
                 null,
                 null
             ]
@@ -518,7 +424,7 @@
         "PedalAssign1": {
             "pedal_switch_configuration": {
                 "configuration": {
-                    "invert": true
+                    "invert": false
                 },
                 "mapping_ring": {
                     "assignment": {

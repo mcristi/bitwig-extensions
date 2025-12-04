@@ -324,7 +324,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private void postInit()
    {
-      activateTopMode(TopMode.SENDS);
+      activateTopMode(TopMode.PROJECT_CONTROLS);
    }
 
    protected void createLayers()

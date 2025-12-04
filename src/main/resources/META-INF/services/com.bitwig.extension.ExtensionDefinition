@@ -1,5 +1,7 @@
 com.bitwig.extensions.controllers.akai.apc40_mkii.APC40MKIIControllerExtensionDefinition
 
+com.bitwig.extensions.controllers.akai.lpd8_mkii.LPD8MKIIExtensionDefinition
+
 com.bitwig.extensions.controllers.nativeinstruments.komplete.definition.KontrolSMk3ExtensionDefinition
 
 com.bitwig.extensions.controllers.paintaudio.midicaptain.PaintAudioMidiCaptainExtensionDefinition
