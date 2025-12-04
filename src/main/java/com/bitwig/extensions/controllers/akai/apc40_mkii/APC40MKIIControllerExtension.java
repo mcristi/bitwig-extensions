@@ -1619,7 +1619,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private final DoublePressedButtonState mSendsOn = new DoublePressedButtonState();
 
-   private TopMode mTopMode = TopMode.PAN;
+   private TopMode mTopMode = TopMode.PROJECT_CONTROLS;
 
    private int mSendIndex = 0; // 0..4
 

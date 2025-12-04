@@ -5,6 +5,7 @@ import com.bitwig.extension.controller.ControllerExtensionDefinition;
 import com.bitwig.extension.controller.api.ControllerHost;
 import com.bitwig.extension.controller.api.MidiIn;
 import com.bitwig.extension.controller.api.NoteInput;
+import com.bitwig.extensions.framework.values.Midi;
 
 
 public class LPD8MKIIExtension extends ControllerExtension
@@ -79,9 +80,9 @@ public class LPD8MKIIExtension extends ControllerExtension
     private void triggerDrumPad(int index)
     {
         // Send MIDI note to trigger the drum pad (C1 = 36 is typically the first pad)
-        noteInput.sendRawMidiEvent(0x90, 36 + index, 127);
+        noteInput.sendRawMidiEvent(Midi.NOTE_ON, 36 + index, 127);
         // Send note off after a short duration
-        host.scheduleTask(() -> noteInput.sendRawMidiEvent(0x80, 36 + index, 0), 100);
+        host.scheduleTask(() -> noteInput.sendRawMidiEvent(Midi.NOTE_OFF, 36 + index, 0), 100);
     }
 
     private void onSysex(String data)
