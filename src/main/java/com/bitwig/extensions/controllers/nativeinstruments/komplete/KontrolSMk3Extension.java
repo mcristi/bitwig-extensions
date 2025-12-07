@@ -300,7 +300,7 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
                 getHost().scheduleTask(() -> {
                     if (footswitch1TipPending) {
                         footswitch1TipPending = false;
-                        RecordUtils.recordClip(getHost(), application, trackBank, sceneBank, project, detailEditor, transport, cursorClip, CommonState.getInstance().isQuantizeClipLengthAfterRecord());
+                        RecordUtils.recordClip(getHost(), application, trackBank, detailEditor, transport, cursorClip, CommonState.getInstance().isQuantizeClipLengthAfterRecord());
                     }
                 }, FOOTSWITCH_BINDING_CALLBACK_DELAY);
             }

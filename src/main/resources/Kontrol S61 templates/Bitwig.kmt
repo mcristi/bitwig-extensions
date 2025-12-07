@@ -58,7 +58,7 @@
                 {
                     "color": "Turquoise",
                     "custom_label": true,
-                    "label": "DL freeze",
+                    "label": "FX on",
                     "mapping": {
                         "assignment": {
                             "cc": {
@@ -75,9 +75,9 @@
                     }
                 },
                 {
-                    "color": "White",
+                    "color": "Turquoise",
                     "custom_label": true,
-                    "label": "1/2",
+                    "label": "FX freeze",
                     "mapping": {
                         "assignment": {
                             "cc": {
@@ -209,47 +209,11 @@
                         }
                     }
                 },
+                null,
+                null,
                 {
                     "custom_label": true,
-                    "display_mode": "unipolar_int",
-                    "label": "DL duck",
-                    "mapping": {
-                        "assignment": {
-                            "cc": {
-                                "midi_cc_number": 16,
-                                "midi_channel": 0
-                            }
-                        },
-                        "behaviour": {
-                            "absolute": {
-                                "max": 127,
-                                "min": 0
-                            }
-                        }
-                    }
-                },
-                {
-                    "custom_label": true,
-                    "display_mode": "unipolar_int",
-                    "label": ">RV ms",
-                    "mapping": {
-                        "assignment": {
-                            "cc": {
-                                "midi_cc_number": 17,
-                                "midi_channel": 0
-                            }
-                        },
-                        "behaviour": {
-                            "absolute": {
-                                "max": 127,
-                                "min": 0
-                            }
-                        }
-                    }
-                },
-                {
-                    "custom_label": true,
-                    "display_mode": "unipolar_int",
+                    "display_mode": "bipolar_int",
                     "label": ">DL beats",
                     "mapping": {
                         "assignment": {
@@ -268,7 +232,7 @@
                 },
                 {
                     "custom_label": true,
-                    "display_mode": "unipolar_int",
+                    "display_mode": "bipolar_int",
                     "label": ">DL fdbck",
                     "mapping": {
                         "assignment": {

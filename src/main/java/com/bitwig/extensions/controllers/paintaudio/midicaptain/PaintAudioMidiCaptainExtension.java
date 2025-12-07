@@ -13,7 +13,6 @@ import com.bitwig.extension.controller.api.DetailEditor;
 import com.bitwig.extension.controller.api.HardwareControlType;
 import com.bitwig.extension.controller.api.MidiIn;
 import com.bitwig.extension.controller.api.PinnableCursorDevice;
-import com.bitwig.extension.controller.api.Project;
 import com.bitwig.extension.controller.api.RemoteControl;
 import com.bitwig.extension.controller.api.SceneBank;
 import com.bitwig.extension.controller.api.SourceSelector;
@@ -66,7 +65,6 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
     private TrackBank trackBank;
     private SceneBank sceneBank;
     private Clip cursorClip;
-    private Project project;
     private DetailEditor detailEditor;
     private CursorTrack cursorTrack;
     private PinnableCursorDevice cursorDevice;
@@ -85,7 +83,6 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
         host = getHost();
 
         application = host.createApplication();
-        project = host.getProject();
         detailEditor = host.createDetailEditor();
 
         transport = host.createTransport();
@@ -104,6 +101,11 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
             track.exists().markInterested();
             track.isActivated().markInterested();
 
+            int trackIndex = i;
+            track.clipLauncherSlotBank().addIsRecordingObserver((int clipIndex, boolean status) -> {
+                CommonState.getInstance().setTrackRecordingClipIndex(trackIndex, clipIndex, status);
+            });
+
             SourceSelector inputSelector = track.sourceSelector();
             inputSelector.hasAudioInputSelected().markInterested();
 
@@ -111,8 +113,6 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
                 sceneBank.getScene(j).exists().markInterested();
 
                 ClipLauncherSlotBank clipLauncherSlotBank = track.clipLauncherSlotBank();
-                clipLauncherSlotBank.getItemAt(j).hasContent().markInterested();
-                clipLauncherSlotBank.getItemAt(j).isRecording().markInterested();
                 clipLauncherSlotBank.getItemAt(j).isPlaying().markInterested();
             }
         }
@@ -306,7 +306,7 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
 
             case BD:
                 if (data2 == OFF) {
-                    RecordUtils.recordClip(host, application, trackBank, sceneBank, project, detailEditor, transport, cursorClip, CommonState.getInstance().isQuantizeClipLengthAfterRecord());
+                    RecordUtils.recordClip(host, application, trackBank, detailEditor, transport, cursorClip, CommonState.getInstance().isQuantizeClipLengthAfterRecord());
                 }
                 break;
             case BD_LONG:
