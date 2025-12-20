@@ -28,8 +28,11 @@ import com.bitwig.extensions.controllers.nativeinstruments.komplete.definition.A
 import com.bitwig.extensions.controllers.nativeinstruments.komplete.device.DeviceControl;
 import com.bitwig.extensions.framework.Layer;
 import com.bitwig.extensions.framework.Layers;
+import com.bitwig.extensions.framework.values.FocusMode;
 import com.bitwig.extensions.util.ClipUtils;
 import com.bitwig.extensions.util.RecordUtils;
+import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_ARRANGE;
+import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_MIX;
 
 public class KontrolSMk3Extension extends KompleteKontrolExtension {
 
@@ -92,6 +95,14 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
                  midiProcessor.intoDawMode(0x4);
               }, 6000);
            }
+        });
+
+        application.panelLayout().addValueObserver((layout) -> {
+            if (layout.equals(PANEL_LAYOUT_ARRANGE)) {
+                this.updateFocusMode(FocusMode.ARRANGER.getDescriptor());
+            } else if (layout.equals(PANEL_LAYOUT_MIX)) {
+                this.updateFocusMode(FocusMode.LAUNCHER.getDescriptor());
+            }
         });
     }
 

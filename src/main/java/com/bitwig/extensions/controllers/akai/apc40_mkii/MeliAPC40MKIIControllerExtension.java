@@ -1,6 +1,5 @@
 package com.bitwig.extensions.controllers.akai.apc40_mkii;
 
-import com.bitwig.extension.api.Color;
 import com.bitwig.extension.controller.ControllerExtensionDefinition;
 import com.bitwig.extension.controller.api.ClipLauncherSlot;
 import com.bitwig.extension.controller.api.ClipLauncherSlotBank;
@@ -10,6 +9,7 @@ import com.bitwig.extension.controller.api.MasterRecorder;
 import com.bitwig.extension.controller.api.Track;
 import com.bitwig.extensions.Globals;
 import com.bitwig.extensions.framework.Layer;
+import com.bitwig.extensions.util.ClipUtils;
 import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_EDIT;
 import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_MIX;
 
@@ -175,35 +175,9 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
          for (int j = 0; j < 5; ++j)
          {
             final ClipLauncherSlot slot = clipLauncherSlotBank.getItemAt(j);
-            mBankLayer.bindPressed(mGridButtons[i + 8 * j], () -> slot.color().set(getSlotColor(slot)));
+            mBankLayer.bindPressed(mGridButtons[i + 8 * j], () -> slot.color().set(ClipUtils.getSlotColor(slot)));
          }
       }
-   }
-
-   private Color getSlotColor(ClipLauncherSlot slot) {
-      Color[] colors = {
-         Color.fromHex("#d92e24"), // red
-         Color.fromHex("#ff5706"), // orange
-         Color.fromHex("#44c8ff"), // dark blue
-         Color.fromHex("#0099d9"), // light blue
-         Color.fromHex("#009d47"), // dark green
-         Color.fromHex("#3ebb62"), // light green
-         Color.fromHex("#d99d10"), // yellow
-         Color.fromHex("#c9c9c9"), // white
-         Color.fromHex("#5761c6"), // dark purple
-         Color.fromHex("#bc76f0"), // light purple
-      };
-      Color currentColor = slot.color().get();
-      int colorIndex = 0;
-      for (int i = 0; i < colors.length; i++) {
-         if (colors[i].toHex().equals(currentColor.toHex())) {
-            colorIndex = i + 1;
-         }
-      }
-      if (colorIndex == colors.length) {
-         colorIndex = 0;
-      }
-      return colors[colorIndex];
    }
 
    private void createPanSelectLayer()
@@ -218,7 +192,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
             final ClipLauncherSlot slot = clipLauncherSlotBank.getItemAt(j);
             mPanSelectLayer.bindPressed(mGridButtons[i + 8 * j], () -> {
                slot.select();
-               slot.showInEditor();
+               slot.showInEditor(); // NOTE: not working in V6
 
                mApplication.setPanelLayout(PANEL_LAYOUT_EDIT);
                host.scheduleTask(() -> mDetailEditor.zoomToFit(), Globals.VISUAL_FEEDBACK_TIMEOUT);

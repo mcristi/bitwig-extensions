@@ -63,7 +63,6 @@ public abstract class KompleteKontrolExtension extends ControllerExtension {
     protected LayoutType currentLayoutType = LayoutType.LAUNCHER;
     protected ControlElements controlElements;
 
-    protected SettableEnumValue focusMode;
     protected Layer arrangeFocusLayer;
     protected Layer sessionFocusLayer;
     protected Layer navigationLayer;
@@ -105,7 +104,6 @@ public abstract class KompleteKontrolExtension extends ControllerExtension {
     protected void activateStandardLayers() {
         mainLayer.activate();
         navigationLayer.activate();
-        updateFocusMode(focusMode.get());
     }
 
     protected abstract void initNavigation();
@@ -310,12 +308,7 @@ public abstract class KompleteKontrolExtension extends ControllerExtension {
 
     public void setUpTransport() {
         final Transport transport = viewControl.getTransport();
-        final DocumentState documentState = getHost().getDocumentState();
-        focusMode = documentState.getEnumSetting(
-            "Focus", //
-            "Recording/Automation",
-            new String[] {FocusMode.LAUNCHER.getDescriptor(), FocusMode.ARRANGER.getDescriptor()},
-            FocusMode.LAUNCHER.getDescriptor());
+
         final ModeButton recButton = controlElements.getButton(CcAssignment.REC);
         final ModeButton autoButton = controlElements.getButton(CcAssignment.AUTO);
         final ModeButton countInButton = controlElements.getButton(CcAssignment.COUNT_IN);
@@ -327,9 +320,6 @@ public abstract class KompleteKontrolExtension extends ControllerExtension {
         sessionFocusLayer.bindToggle(recButton.getHwButton(), transport.isClipLauncherOverdubEnabled());
         sessionFocusLayer.bindToggle(autoButton.getHwButton(), transport.isClipLauncherAutomationWriteEnabled());
         sessionFocusLayer.bindToggle(countInButton.getHwButton(), viewControl.getCursorTrack().arm());
-
-        focusMode.addValueObserver(this::updateFocusMode);
-        focusMode.markInterested();
 
         final ModeButton playButton = controlElements.getButton(CcAssignment.PLAY);
         mainLayer.bindPressed(playButton.getHwButton(), transport.continuePlaybackAction());
