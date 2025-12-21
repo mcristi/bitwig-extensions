@@ -9,7 +9,7 @@ import com.bitwig.extension.controller.api.MasterRecorder;
 import com.bitwig.extension.controller.api.Track;
 import com.bitwig.extensions.Globals;
 import com.bitwig.extensions.framework.Layer;
-import com.bitwig.extensions.util.ClipUtils;
+import com.bitwig.extensions.util.ColorUtils;
 import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_EDIT;
 import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_MIX;
 
@@ -175,7 +175,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
          for (int j = 0; j < 5; ++j)
          {
             final ClipLauncherSlot slot = clipLauncherSlotBank.getItemAt(j);
-            mBankLayer.bindPressed(mGridButtons[i + 8 * j], () -> slot.color().set(ClipUtils.getSlotColor(slot)));
+            mBankLayer.bindPressed(mGridButtons[i + 8 * j], () -> slot.color().set(ColorUtils.getColor(slot)));
          }
       }
    }
