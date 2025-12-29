@@ -3,6 +3,7 @@ package com.bitwig.extensions.controllers.paintaudio.midicaptain;
 import com.bitwig.extension.controller.ControllerExtension;
 import com.bitwig.extension.controller.ControllerExtensionDefinition;
 import com.bitwig.extension.controller.api.Application;
+import com.bitwig.extension.controller.api.Arranger;
 import com.bitwig.extension.controller.api.Clip;
 import com.bitwig.extension.controller.api.ClipLauncherSlotBank;
 import com.bitwig.extension.controller.api.ControllerHost;
@@ -27,6 +28,8 @@ import com.bitwig.extensions.util.DeviceUtils;
 import com.bitwig.extensions.util.RecordUtils;
 import com.bitwig.extensions.util.SceneUtils;
 import com.bitwig.extensions.util.TrackUtils;
+import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_ARRANGE;
+import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_MIX;
 
 public class PaintAudioMidiCaptainExtension extends ControllerExtension
 {
@@ -56,6 +59,13 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
         PAN
     }
     private ExpressionMode expressionMode = ExpressionMode.VOLUME;
+
+    private enum FocusMode {
+        MIX,
+        ARRANGE,
+    }
+    private FocusMode focusMode = FocusMode.MIX;
+
     private boolean openWindowOnArm = true;
 
     // API objects
@@ -66,6 +76,7 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
     private SceneBank sceneBank;
     private Clip cursorClip;
     private DetailEditor detailEditor;
+    private Arranger arranger;
     private CursorTrack cursorTrack;
     private PinnableCursorDevice cursorDevice;
     private CursorRemoteControlsPage cursorRemoteControlsPage;
@@ -83,11 +94,25 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
         host = getHost();
 
         application = host.createApplication();
+        application.panelLayout().addValueObserver((layout) -> {
+            if (layout.equals(PANEL_LAYOUT_ARRANGE)) {
+                focusMode = FocusMode.ARRANGE;
+            } else if (layout.equals(PANEL_LAYOUT_MIX)) {
+                focusMode = FocusMode.MIX;
+            }
+        });
+
         detailEditor = host.createDetailEditor();
+        arranger = host.createArranger();
 
         transport = host.createTransport();
         transport.isPlaying().markInterested();
         transport.defaultLaunchQuantization().markInterested();
+        transport.isArrangerRecordEnabled().markInterested();
+        transport.isArrangerAutomationWriteEnabled().markInterested();
+        transport.isArrangerLoopEnabled().markInterested();
+        transport.arrangerLoopStart().markInterested();
+        transport.arrangerLoopDuration().markInterested();
 
         trackBank = host.createTrackBank(Globals.NUMBER_OF_TRACKS, Globals.NUMBER_OF_SENDS, Globals.NUMBER_OF_SCENES);
         trackBank.itemCount().markInterested();
@@ -180,31 +205,53 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
 
         switch (data1) {
             case B1:
-                int loopStartIncrement = transport.defaultLaunchQuantization().get().equals("1/4") ? 4 : 1;
-                if (data2 == 1) {
-                    cursorClip.getLoopStart().inc(loopStartIncrement);
-                    cursorClip.getLoopLength().inc(-loopStartIncrement);
-                } else if (data2 == 2) {
-                    cursorClip.getLoopStart().inc(-loopStartIncrement);
-                    cursorClip.getLoopLength().inc(loopStartIncrement);
+                if (focusMode == FocusMode.MIX) {
+                    int loopIncrement = transport.defaultLaunchQuantization().get().equals("1/4") ? 4 : 1;
+
+                    if (data2 == 1) {
+                        cursorClip.getLoopStart().inc(loopIncrement);
+                        cursorClip.getLoopLength().inc(-loopIncrement);
+                    } else if (data2 == 2) {
+                        cursorClip.getLoopStart().inc(-loopIncrement);
+                        cursorClip.getLoopLength().inc(loopIncrement);
+                    }
+                    host.scheduleTask(() -> {
+                        cursorClip.getPlayStart().set(cursorClip.getLoopStart().get());
+                        detailEditor.zoomToFit();
+                    }, Globals.VISUAL_FEEDBACK_TIMEOUT);
+                } else {
+                    int loopIncrement = transport.defaultLaunchQuantization().get().equals("1/4") ? 4 : 1;
+
+                    if (data2 == 1) {
+                        transport.arrangerLoopStart().inc(loopIncrement);
+                    } else if (data2 == 2) {
+                        transport.arrangerLoopStart().inc(-loopIncrement);
+                    }
                 }
-                host.scheduleTask(() -> {
-                    cursorClip.getPlayStart().set(cursorClip.getLoopStart().get());
-                    detailEditor.zoomToFit();
-                }, Globals.VISUAL_FEEDBACK_TIMEOUT);
                 break;
 
             case B2:
-                int loopLengthIncrement = transport.defaultLaunchQuantization().get().equals("1/4") ? 4 : 1;
-                if (data2 == 1) {
-                    cursorClip.getLoopLength().inc(-loopLengthIncrement);
-                } else if (data2 == 2) {
-                    cursorClip.getLoopLength().inc(loopLengthIncrement);
+                if (focusMode == FocusMode.MIX) {
+                    int loopIncrement = transport.defaultLaunchQuantization().get().equals("1/4") ? 4 : 1;
+
+                    if (data2 == 1) {
+                        cursorClip.getLoopLength().inc(-loopIncrement);
+                    } else if (data2 == 2) {
+                        cursorClip.getLoopLength().inc(loopIncrement);
+                    }
+                    host.scheduleTask(() -> {
+                        cursorClip.getPlayStart().set(cursorClip.getLoopStart().get());
+                        detailEditor.zoomToFit();
+                    }, Globals.VISUAL_FEEDBACK_TIMEOUT);
+                } else {
+                    int loopIncrement = transport.defaultLaunchQuantization().get().equals("1/4") ? 4 : 1;
+
+                    if (data2 == 1) {
+                        transport.arrangerLoopDuration().inc(loopIncrement);
+                    } else if (data2 == 2) {
+                        transport.arrangerLoopDuration().inc(-loopIncrement);
+                    }
                 }
-                host.scheduleTask(() -> {
-                    cursorClip.getPlayStart().set(cursorClip.getLoopStart().get());
-                    detailEditor.zoomToFit();
-                }, Globals.VISUAL_FEEDBACK_TIMEOUT);
                 break;
 
             case B3:
@@ -258,6 +305,7 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
                 if (data2 == OFF) {
                     transport.stop();
                 }
+                break;
 
             case BB:
                 if (data2 == OFF) {
@@ -275,13 +323,28 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
                 int trackOffset = trackBank.getItemAt(0).isActivated().get() ? 0 : 3;
 
                 if (data2 == 1) {
-                    ApplicationUtils.showMixPanelLayout(application);
+                    if (focusMode == FocusMode.MIX) {
+                        ApplicationUtils.showMixLayout(application);
+                    } else {
+                        ApplicationUtils.showArrangerLayout(application);
+                    }
+
                     TrackUtils.arm(host, trackBank, cursorTrack, cursorDevice, trackOffset, this.openWindowOnArm);
                 } else if (data2 == 2) {
-                    ApplicationUtils.showMixPanelLayout(application);
+                    if (focusMode == FocusMode.MIX) {
+                        ApplicationUtils.showMixLayout(application);
+                    } else {
+                        ApplicationUtils.showArrangerLayout(application);
+                    }
+
                     TrackUtils.arm(host, trackBank, cursorTrack, cursorDevice, trackOffset + 1, this.openWindowOnArm);
                 } else if (data2 == 3) {
-                    ApplicationUtils.showMixPanelLayout(application);
+                    if (focusMode == FocusMode.MIX) {
+                        ApplicationUtils.showMixLayout(application);
+                    } else {
+                        ApplicationUtils.showArrangerLayout(application);
+                    }
+
                     TrackUtils.arm(host, trackBank, cursorTrack, cursorDevice, trackOffset + 2, this.openWindowOnArm);
                 } else if (data2 == 50) {
                     if (trackOffset == 0) {
@@ -306,23 +369,42 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
 
             case BD:
                 if (data2 == OFF) {
-                    RecordUtils.recordClip(host, application, trackBank, detailEditor, transport, cursorClip, CommonState.getInstance().isQuantizeClipLengthAfterRecord());
+                    if (focusMode == FocusMode.MIX) {
+                        RecordUtils.recordClip(host, application, trackBank, detailEditor, transport, cursorClip, CommonState.getInstance().isQuantizeClipLengthAfterRecord());
+                    } else {
+                        boolean recordingState = transport.isArrangerRecordEnabled().get();
+                        transport.isArrangerRecordEnabled().set(!recordingState);
+                        transport.isArrangerAutomationWriteEnabled().set(!recordingState);
+                        transport.isArrangerOverdubEnabled().set(!recordingState);
+                    }
                 }
                 break;
             case BD_LONG:
                 if (data2 == OFF) {
-                    ClipUtils.delete(application, cursorClip);
+                    if (focusMode == FocusMode.MIX) {
+                        ClipUtils.delete(application, cursorClip);
+                    } else {
+                        transport.isArrangerLoopEnabled().toggle();
+                    }
                 }
                 break;
 
             case UP:
                 if (data2 == OFF) {
-                    SceneUtils.launchPrev(application, sceneBank, trackBank);
+                    if (focusMode == FocusMode.MIX) {
+                        SceneUtils.launchPrev(application, sceneBank, trackBank);
+                    } else {
+                        arranger.zoomIn();
+                    }
                 }
                 break;
             case DOWN:
                 if (data2 == OFF) {
-                    SceneUtils.launchNext(application, sceneBank, trackBank);
+                    if (focusMode == FocusMode.MIX) {
+                        SceneUtils.launchNext(application, sceneBank, trackBank);
+                    } else {
+                        arranger.zoomOut();
+                    }
                 }
                 break;
 

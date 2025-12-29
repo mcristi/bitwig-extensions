@@ -17,7 +17,7 @@ public class RecordUtils
     public static void recordClip(ControllerHost host, Application application,
                                   TrackBank trackBank, DetailEditor detailEditor, Transport transport,
                                   Clip cursorClip, boolean quantizeClipLengthAfterRecord) {
-        ApplicationUtils.showEditPanelLayout(application);
+        ApplicationUtils.showEditLayout(application);
 
         for (int i = 0; i < Globals.NUMBER_OF_TRACKS; i++) {
             final Track track = trackBank.getItemAt(i);

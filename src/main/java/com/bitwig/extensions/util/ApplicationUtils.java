@@ -1,6 +1,7 @@
 package com.bitwig.extensions.util;
 
 import com.bitwig.extension.controller.api.Application;
+import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_ARRANGE;
 import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_EDIT;
 import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_MIX;
 
@@ -14,11 +15,15 @@ public class ApplicationUtils
         application.getAction("Select sub panel 3").invoke();
     }
 
-    public static void showEditPanelLayout(Application application) {
+    public static void showEditLayout(Application application) {
         application.setPanelLayout(PANEL_LAYOUT_EDIT);
     }
 
-    public static void showMixPanelLayout(Application application) {
+    public static void showMixLayout(Application application) {
         application.setPanelLayout(PANEL_LAYOUT_MIX);
+    }
+
+    public static void showArrangerLayout(Application application) {
+        application.setPanelLayout(PANEL_LAYOUT_ARRANGE);
     }
 }
