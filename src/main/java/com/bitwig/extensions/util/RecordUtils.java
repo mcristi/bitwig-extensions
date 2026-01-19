@@ -9,7 +9,6 @@ import com.bitwig.extension.controller.api.SourceSelector;
 import com.bitwig.extension.controller.api.Track;
 import com.bitwig.extension.controller.api.TrackBank;
 import com.bitwig.extension.controller.api.Transport;
-import com.bitwig.extensions.CommonState;
 import com.bitwig.extensions.Globals;
 
 public class RecordUtils
@@ -21,16 +20,16 @@ public class RecordUtils
 
         for (int i = 0; i < Globals.NUMBER_OF_TRACKS; i++) {
             final Track track = trackBank.getItemAt(i);
-            Integer recordingClipIndex = CommonState.getInstance().getTrackRecordingClipIndex(i);
 
-            if (recordingClipIndex == null && track.arm().get()) {
+            if (track.arm().get() && !cursorClip.clipLauncherSlot().isRecording().get()) {
                 track.recordNewLauncherClip(0);
 
                 // TODO: enable Follow Playback. No API currently
-            } else if (recordingClipIndex != null) {
-                track.clipLauncherSlotBank().launch(recordingClipIndex);
+            } else if (cursorClip.clipLauncherSlot().isRecording().get()) {
+                cursorClip.launch();
 
-                host.scheduleTask(detailEditor::zoomToFit, Globals.VISUAL_FEEDBACK_TIMEOUT);
+                host.scheduleTask(detailEditor::zoomToFit, Globals.VISUAL_FEEDBACK_TIMEOUT * 4);
+
                 if (quantizeClipLengthAfterRecord) {
                     host.scheduleTask(() -> { // Delay length quantization to ensure the clip is launched
                         quantizeClipLength(cursorClip, transport);

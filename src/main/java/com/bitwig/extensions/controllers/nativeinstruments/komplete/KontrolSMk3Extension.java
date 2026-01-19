@@ -268,6 +268,7 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
         SceneBank sceneBank = trackBank.sceneBank();
 
         Clip cursorClip = getHost().createLauncherCursorClip(Globals.NUMBER_OF_TRACKS, Globals.NUMBER_OF_SCENES);
+        cursorClip.clipLauncherSlot().isRecording().markInterested();
 
         for (int i = 0; i < Globals.NUMBER_OF_SCENES; i++) {
             final Scene scene = sceneBank.getScene(i);

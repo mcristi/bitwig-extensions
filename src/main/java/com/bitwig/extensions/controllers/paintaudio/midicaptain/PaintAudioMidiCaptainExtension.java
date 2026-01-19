@@ -126,9 +126,10 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
             track.exists().markInterested();
             track.isActivated().markInterested();
 
-            int trackIndex = i;
             track.clipLauncherSlotBank().addIsRecordingObserver((int clipIndex, boolean status) -> {
-                CommonState.getInstance().setTrackRecordingClipIndex(trackIndex, clipIndex, status);
+                if (status) {
+                    track.clipLauncherSlotBank().select(clipIndex);
+                }
             });
 
             SourceSelector inputSelector = track.sourceSelector();
@@ -148,6 +149,7 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
         cursorClip.getLoopStart().markInterested();
         cursorClip.getPlayStart().markInterested();
         cursorClip.getPlayStop().markInterested();
+        cursorClip.clipLauncherSlot().isRecording().markInterested();
 
         cursorTrack = host.createCursorTrack("CURSOR_TRACK", "My Cursor Track", Globals.NUMBER_OF_SENDS, Globals.NUMBER_OF_SCENES, true);
         cursorTrack.position().markInterested();
