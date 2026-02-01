@@ -5,7 +5,7 @@ import com.bitwig.extension.controller.api.HardwareSurface;
 import com.bitwig.extension.controller.api.InternalHardwareLightState;
 import com.bitwig.extensions.controllers.akai.apc.common.MidiProcessor;
 import com.bitwig.extensions.controllers.akai.apc.common.led.RgbLightState;
-import com.bitwig.extensions.controllers.novation.commonsmk3.ColorLookup;
+import com.bitwig.extensions.controllers.akai.apc.common.led.ColorLookup;
 import com.bitwig.extensions.framework.values.Midi;
 
 public class RgbButton extends ApcButton {

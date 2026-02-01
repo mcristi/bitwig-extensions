@@ -6,7 +6,7 @@ import com.bitwig.extension.controller.api.Track;
 import com.bitwig.extension.controller.api.TrackBank;
 import com.bitwig.extensions.controllers.akai.apc.common.led.LedBehavior;
 import com.bitwig.extensions.controllers.akai.apc.common.led.RgbLightState;
-import com.bitwig.extensions.controllers.novation.commonsmk3.ColorLookup;
+import com.bitwig.extensions.controllers.akai.apc.common.led.ColorLookup;
 import com.bitwig.extensions.framework.Layer;
 import com.bitwig.extensions.framework.Layers;
 
