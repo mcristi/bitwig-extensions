@@ -11,8 +11,10 @@ import com.bitwig.extensions.framework.values.Midi;
 public class LPD8MKIIExtension extends ControllerExtension
 {
     // MIDI Constants
-    private static final int CHANNEL = 176;
-    private static final int PROG_CHANGE = 192;
+    private static final int CONTROL_CHANGE = 176;
+    private static final int PROGRAM_CHANGE = 192;
+
+    private static final int ON = 127, OFF = 0;
 
     // CC mappings
     private static final int PAD_01 = 71;
@@ -50,7 +52,7 @@ public class LPD8MKIIExtension extends ControllerExtension
 
     private void onMidi(int status, int data1, int data2)
     {
-        if (status == CHANNEL && data2 > 0)
+        if (status == CONTROL_CHANGE && data2 == ON)
         {
             switch (data1)
             {
@@ -67,7 +69,7 @@ public class LPD8MKIIExtension extends ControllerExtension
                     triggerDrumPad(3);
                     break;
             }
-        } else if (status == PROG_CHANGE) {
+        } else if (status == PROGRAM_CHANGE) {
             // Handle program change messages if needed
         }
     }
@@ -80,7 +82,7 @@ public class LPD8MKIIExtension extends ControllerExtension
     private void triggerDrumPad(int index)
     {
         // Send MIDI note to trigger the drum pad (C1 = 36 is typically the first pad)
-        noteInput.sendRawMidiEvent(Midi.NOTE_ON, 36 + index, 127);
+        noteInput.sendRawMidiEvent(Midi.NOTE_ON, 36 + index, 100);
         // Send note off after a short duration
         host.scheduleTask(() -> noteInput.sendRawMidiEvent(Midi.NOTE_OFF, 36 + index, 0), 100);
     }

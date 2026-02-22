@@ -38,4 +38,5 @@
 - LAUNCHER mode enabled by default
 - `PLAY` - continue playback
 - `SHIFT` + `RECORD` - toggle current track arm
+- `AUTO` - restore automation
 - `Assign 1` pedal: TIP: record, RING: delete selected clip, TIP & RING: restore automation

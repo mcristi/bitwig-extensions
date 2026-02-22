@@ -318,7 +318,8 @@ public abstract class KompleteKontrolExtension extends ControllerExtension {
         arrangeFocusLayer.bindToggle(countInButton.getHwButton(), transport.isArrangerOverdubEnabled());
 
         sessionFocusLayer.bindToggle(recButton.getHwButton(), transport.isClipLauncherOverdubEnabled());
-        sessionFocusLayer.bindToggle(autoButton.getHwButton(), transport.isClipLauncherAutomationWriteEnabled());
+        sessionFocusLayer.bind(transport.isAutomationOverrideActive(), autoButton.getLed());
+        sessionFocusLayer.bindPressed(autoButton.getHwButton(), transport::resetAutomationOverrides);
         sessionFocusLayer.bindToggle(countInButton.getHwButton(), viewControl.getCursorTrack().arm());
 
         final ModeButton playButton = controlElements.getButton(CcAssignment.PLAY);

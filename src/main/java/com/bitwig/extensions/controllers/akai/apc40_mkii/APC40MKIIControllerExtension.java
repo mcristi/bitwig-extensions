@@ -304,9 +304,6 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mTransport.tempo().markInterested();
       mTransport.isPlaying().markInterested();
       mTransport.isArrangerRecordEnabled().markInterested();
-      mTransport.isArrangerAutomationWriteEnabled().markInterested();
-      mTransport.isClipLauncherAutomationWriteEnabled().markInterested();
-      mTransport.isClipLauncherOverdubEnabled().markInterested();
       mTransport.defaultLaunchQuantization().markInterested();
    }
 

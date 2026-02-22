@@ -28,7 +28,8 @@ public class RecordUtils
             } else if (cursorClip.clipLauncherSlot().isRecording().get()) {
                 cursorClip.launch();
 
-                host.scheduleTask(detailEditor::zoomToFit, Globals.VISUAL_FEEDBACK_TIMEOUT * 4);
+                // TODO: remove this after the glitch is fixed by Bitwig
+                host.scheduleTask(detailEditor::zoomToFit, 1000);
 
                 if (quantizeClipLengthAfterRecord) {
                     host.scheduleTask(() -> { // Delay length quantization to ensure the clip is launched
