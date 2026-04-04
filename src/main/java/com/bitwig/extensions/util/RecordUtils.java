@@ -27,13 +27,12 @@ public class RecordUtils
                 // TODO: enable Follow Playback. No API currently
             } else if (cursorClip.clipLauncherSlot().isRecording().get()) {
                 cursorClip.launch();
-
-                // TODO: remove this after the glitch is fixed by Bitwig
-                host.scheduleTask(detailEditor::zoomToFit, 1000);
+                host.scheduleTask(detailEditor::zoomToFit, Globals.VISUAL_FEEDBACK_TIMEOUT);
 
                 if (quantizeClipLengthAfterRecord) {
                     host.scheduleTask(() -> { // Delay length quantization to ensure the clip is launched
                         quantizeClipLength(cursorClip, transport);
+                        host.scheduleTask(detailEditor::zoomToFit, Globals.VISUAL_FEEDBACK_TIMEOUT);
                     }, 1000);
                 }
             }

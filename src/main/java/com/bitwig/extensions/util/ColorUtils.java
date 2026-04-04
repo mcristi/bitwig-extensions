@@ -31,8 +31,8 @@ public class ColorUtils {
             if (
                 // NOTE: this is a workaround for V6 color issues
                 Math.abs(colors[i].getRed255() - currentColor.getRed255()) < 10 &&
-                    Math.abs(colors[i].getGreen255() - currentColor.getGreen255()) < 10 &&
-                    Math.abs(colors[i].getBlue255() - currentColor.getBlue255()) < 10
+                Math.abs(colors[i].getGreen255() - currentColor.getGreen255()) < 10 &&
+                Math.abs(colors[i].getBlue255() - currentColor.getBlue255()) < 10
             ) {
                 colorIndex = i + 1;
             }
