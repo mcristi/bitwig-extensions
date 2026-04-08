@@ -54,7 +54,7 @@ public class PaintAudioMidiCaptainExtensionDefinition extends ControllerExtensio
    @Override
    public int getRequiredAPIVersion()
    {
-      return 24;
+      return 25;
    }
 
    @Override

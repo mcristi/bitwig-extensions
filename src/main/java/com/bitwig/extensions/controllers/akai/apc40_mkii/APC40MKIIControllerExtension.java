@@ -215,6 +215,8 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mTrackBank = host.createTrackBank(8, 5, 5, false);
       mTrackBank.setSkipDisabledItems(true);
       mTrackBank.setShouldShowClipLauncherFeedback(true);
+//      mTrackBank.setContentFilter(TrackBankContentFilter.ALL_VISIBLE_CHANNELS);
+//      mTrackBank.setSupportsDeviceChainChannels(true);
 
       mSceneBank = mTrackBank.sceneBank();
       mSceneBank.setIndication(true);
