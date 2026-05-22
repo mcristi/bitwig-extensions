@@ -87,16 +87,7 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
         initScrubZoomControl();
         activateStandardLayers();
 
-        // NOTE: workaround for glitchy plugin mode after project init
         application = host.createApplication();
-        application.hasActiveEngine().addValueObserver((active) -> {
-           if (active) {
-              host.scheduleTask(() -> {
-                 midiProcessor.intoDawMode(0x4);
-              }, 6000);
-           }
-        });
-
         application.panelLayout().addValueObserver((layout) -> {
             if (layout.equals(PANEL_LAYOUT_ARRANGE)) {
                 this.updateFocusMode(FocusMode.ARRANGER.getDescriptor());
