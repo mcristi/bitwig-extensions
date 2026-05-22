@@ -19,6 +19,7 @@ import com.bitwig.extensions.controllers.nativeinstruments.komplete.CcAssignment
 import com.bitwig.extensions.controllers.nativeinstruments.komplete.DataStringUtil;
 import com.bitwig.extensions.controllers.nativeinstruments.komplete.KompleteKontrolExtension;
 import com.bitwig.extensions.controllers.nativeinstruments.komplete.LayoutType;
+import com.bitwig.extensions.controllers.nativeinstruments.komplete.NksDevice;
 import com.bitwig.extensions.controllers.nativeinstruments.komplete.device.DeviceSelectionTab;
 
 public class MidiProcessor {
@@ -39,6 +40,7 @@ public class MidiProcessor {
     private final List<DeviceMidiListener> deviceListeners = new ArrayList<>();
     private final List<IntConsumer> modeListener = new ArrayList<>();
     private final List<DoubleConsumer> tempoListener = new ArrayList<>();
+    private final boolean[] selectedState = new boolean[8];
     
     public MidiProcessor(final ControllerHost host, final HardwareSurface surface) {
         this.midiIn = host.getMidiInPort(0);
@@ -141,12 +143,65 @@ public class MidiProcessor {
         return hwButton;
     }
     
+    private String currentNksDeviceName = "";
+    
+    public void registerNksDevice(final String name) {
+        currentNksDeviceName = name;
+    }
+    
+    public void registerNksParam(final NksDevice deviceTyp, final String paramId) {
+        if (!paramId.isBlank()) {
+            updateKompleteKontrolInstance(paramId);
+        }
+    }
+    
     public void updateKompleteKontrolInstance(final String instanceParamName) {
+        if (instanceParamName.isBlank()) {
+            return;
+        }
         if (lastReportedKKInstance == null || !lastReportedKKInstance.equals(instanceParamName)) {
             sendTextCommand(TextCommand.SELECTED_TRACK, instanceParamName);
             host.scheduleTask(() -> sendTextCommand(TextCommand.SELECTED_TRACK, instanceParamName), 100);
             lastReportedKKInstance = instanceParamName;
         }
+    }
+    
+    public void sendColor(final int index, final String color) {
+        TextCommand.COLOR_UPDATE.send(midiOut, index, color);
+    }
+    
+    public void sendSelectionIndex(final int index, final int[] subIndexes) {
+        ValueCommand.SELECTION_INDEX.send(midiOut, index, subIndexes);
+    }
+    
+    public void refreshSelectedColor() {
+        host.scheduleTask(this::refreshSelection, 10);
+        this.refreshSelection();
+    }
+    
+    private void refreshSelection() {
+        final int selectedIndex = getSelectedIndex();
+        if (selectedIndex == 0) {
+            ValueCommand.SELECT.send(midiOut, 1, true);
+            host.scheduleTask(() -> ValueCommand.SELECT.send(midiOut, 0, true), 60);
+        }
+    }
+    
+    private int getSelectedIndex() {
+        for (int i = 0; i < selectedState.length; i++) {
+            if (selectedState[i]) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    
+    public void sendSelectCommand(final int index, final boolean selected) {
+        if (selectedState[index] == selected) {
+            return;
+        }
+        selectedState[index] = selected;
+        ValueCommand.SELECT.send(midiOut, index, selected);
     }
     
     public void sendValueCommand(final ValueCommand command, final int index, final boolean value) {
@@ -167,10 +222,6 @@ public class MidiProcessor {
     
     public void sendLayoutCommand(final LayoutType layoutType) {
         TextCommand.CONFIG.send(midiOut, layoutType == LayoutType.LAUNCHER ? 0 : 1, 0, "track_orientation");
-    }
-    
-    public void sendColor(final int index, final String color) {
-        TextCommand.COLOR_UPDATE.send(midiOut, index, color);
     }
     
     public void sendDawInfo(final int major, final int minor) {
@@ -205,10 +256,6 @@ public class MidiProcessor {
     
     public void sendParamValue(final int index, final String value) {
         TextCommand.PARAMETER_VALUE.send(midiOut, index, value);
-    }
-    
-    public void sendSelectionIndex(final int index, final int[] subindexes) {
-        ValueCommand.SELECTION_INDEX.send(midiOut, index, subindexes);
     }
     
     public void sendLedUpdate(final CcAssignment assignment, final int value) {
