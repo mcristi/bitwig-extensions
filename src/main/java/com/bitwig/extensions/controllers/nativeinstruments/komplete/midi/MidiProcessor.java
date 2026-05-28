@@ -143,16 +143,26 @@ public class MidiProcessor {
         return hwButton;
     }
     
-    private String currentNksDeviceName = "";
-    
-    public void registerNksDevice(final String name) {
-        currentNksDeviceName = name;
-    }
-    
+    private boolean cursorHasNksDevice;
+
     public void registerNksParam(final NksDevice deviceTyp, final String paramId) {
         if (!paramId.isBlank()) {
+            cursorHasNksDevice = true;
             updateKompleteKontrolInstance(paramId);
         }
+    }
+
+    // When the cursor device changes, wait briefly for NKS param observers to fire.
+    // If none report a valid KK instance, clear SELECTED_TRACK so the hardware exits
+    // plugin mode and returns to DAW mode (fixes stale plugin display on track switch).
+    public void onCursorDeviceChanged() {
+        cursorHasNksDevice = false;
+        host.scheduleTask(() -> {
+            if (!cursorHasNksDevice && lastReportedKKInstance != null) {
+                sendTextCommand(TextCommand.SELECTED_TRACK, "");
+                lastReportedKKInstance = null;
+            }
+        }, 100);
     }
     
     public void updateKompleteKontrolInstance(final String instanceParamName) {

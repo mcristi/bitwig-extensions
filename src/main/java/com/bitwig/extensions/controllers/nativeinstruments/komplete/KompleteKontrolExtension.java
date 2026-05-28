@@ -3,7 +3,6 @@ package com.bitwig.extensions.controllers.nativeinstruments.komplete;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.bitwig.extension.api.Color;
@@ -15,9 +14,6 @@ import com.bitwig.extension.controller.api.ControllerHost;
 import com.bitwig.extension.controller.api.CursorRemoteControlsPage;
 import com.bitwig.extension.controller.api.CursorTrack;
 import com.bitwig.extension.controller.api.DetailEditor;
-import com.bitwig.extension.controller.api.Device;
-import com.bitwig.extension.controller.api.DeviceBank;
-import com.bitwig.extension.controller.api.DeviceMatcher;
 import com.bitwig.extension.controller.api.HardwareButton;
 import com.bitwig.extension.controller.api.HardwareElement;
 import com.bitwig.extension.controller.api.HardwareSurface;
@@ -261,14 +257,7 @@ public abstract class KompleteKontrolExtension extends ControllerExtension {
         if (hasDeviceControl()) {
             mixerTrackBank.scrollPosition().addValueObserver(this::handleTrackScrollChanged);
         }
-        //        else {
-        //            for (final NksDevice deviceType : NksDevice.values()) {
-        //                final SpecificPluginDevice specDevice = deviceType.createSpecDevice(cursorDevice);
-        //                final Parameter instId = specDevice.createParameter(deviceType.getParamOffset());
-        //                instId.name().addValueObserver(midiProcessor::updateKompleteKontrolInstance);
-        //            }
-        //        }
-        initNksDiscovery(cursorTrack);
+        initNksDiscovery(cursorDevice);
 
         mainLayer.bindPressed(controlElements.getMuteSelectedButton(), cursorTrack.mute().toggleAction());
         mainLayer.bindPressed(controlElements.getSoloSelectedButton(), cursorTrack.solo().toggleAction());
@@ -283,20 +272,19 @@ public abstract class KompleteKontrolExtension extends ControllerExtension {
         }
     }
 
-    private void initNksDiscovery(final CursorTrack cursorTrack) {
-        final DeviceBank nksDiscoverBank = cursorTrack.createDeviceBank(1);
-        final DeviceMatcher matcher = getHost().createOrDeviceMatcher(Arrays.stream(NksDevice.values()) //
-            .map(type -> type.createMatcher(getHost()))  //
-            .toArray(DeviceMatcher[]::new));
+    // Uses cursorDevice (follows actual user selection, including into Drum Machine/Rack chains)
+    // instead of a track-level DeviceBank, which matched KK plugins indiscriminately — including
+    // wrong instances inside containers (fixing wrong plugin shown in nested chains).
+    // The name observer triggers NKS state clearing when the cursor moves to a non-KK device,
+    // so the hardware returns to DAW mode instead of showing a stale plugin.
+    private void initNksDiscovery(final PinnableCursorDevice cursorDevice) {
+        cursorDevice.name().addValueObserver(name -> midiProcessor.onCursorDeviceChanged());
 
-        nksDiscoverBank.setDeviceMatcher(matcher);
-        final Device nksDevice = nksDiscoverBank.getDevice(0);
         for (final NksDevice deviceType : NksDevice.values()) {
-            final SpecificPluginDevice specDevice = deviceType.createSpecDevice(nksDevice);
+            final SpecificPluginDevice specDevice = deviceType.createSpecDevice(cursorDevice);
             final Parameter instId = specDevice.createParameter(deviceType.getParamOffset());
             instId.name().addValueObserver(name -> midiProcessor.registerNksParam(deviceType, name));
         }
-        nksDevice.name().addValueObserver(name -> midiProcessor.registerNksDevice(name));
     }
 
     private void handleTrackScrollChanged(final int pos) {
