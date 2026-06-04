@@ -13,6 +13,7 @@ import com.bitwig.extension.controller.api.DrumPadBank;
 import com.bitwig.extension.controller.api.HardwareSurface;
 import com.bitwig.extension.controller.api.MidiIn;
 import com.bitwig.extension.controller.api.MidiOut;
+import com.bitwig.extension.controller.api.CursorDeviceFollowMode;
 import com.bitwig.extension.controller.api.PinnableCursorDevice;
 import com.bitwig.extension.controller.api.Send;
 import com.bitwig.extensions.framework.values.Midi;
@@ -96,12 +97,15 @@ public class MidiMixExtension extends ControllerExtension
 
         cursorTrack = host.createCursorTrack(NUM_SENDS, 0);
         cursorTrack.volume().markInterested();
-        final PinnableCursorDevice cursorDevice = cursorTrack.createCursorDevice();
+        final PinnableCursorDevice cursorDevice = cursorTrack.createCursorDevice(
+            "midi-mix-drum", "Drum Machine", NUM_SENDS, CursorDeviceFollowMode.FIRST_INSTRUMENT);
         drumPadBank = cursorDevice.createDrumPadBank(NUM_CHANNELS);
 
         cursorDevice.hasDrumPads().addValueObserver(this::onDrumPadsChanged);
 
-        deviceButtonControls = cursorDevice.createCursorRemoteControlsPage("Buttons", NUM_CHANNELS, "");
+        final PinnableCursorDevice lastDevice = cursorTrack.createCursorDevice(
+            "midi-mix-buttons", "Button Device", 0, CursorDeviceFollowMode.LAST_DEVICE);
+        deviceButtonControls = lastDevice.createCursorRemoteControlsPage("Buttons", NUM_CHANNELS, "");
         deviceButtonControls.pageCount().addValueObserver(count ->
         {
             if (count > 1)
