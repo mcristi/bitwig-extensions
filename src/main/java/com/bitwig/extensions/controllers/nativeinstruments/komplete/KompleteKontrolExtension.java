@@ -256,8 +256,13 @@ public abstract class KompleteKontrolExtension extends ControllerExtension {
 
         if (hasDeviceControl()) {
             mixerTrackBank.scrollPosition().addValueObserver(this::handleTrackScrollChanged);
+        } else {
+            for (final NksDevice deviceType : NksDevice.values()) {
+                final SpecificPluginDevice specDevice = deviceType.createSpecDevice(cursorDevice);
+                final Parameter instId = specDevice.createParameter(deviceType.getParamOffset());
+                instId.name().addValueObserver(id -> midiProcessor.registerNksParam(deviceType, id));
+            }
         }
-        initNksDiscovery(cursorDevice);
 
         mainLayer.bindPressed(controlElements.getMuteSelectedButton(), cursorTrack.mute().toggleAction());
         mainLayer.bindPressed(controlElements.getSoloSelectedButton(), cursorTrack.solo().toggleAction());
@@ -269,21 +274,6 @@ public abstract class KompleteKontrolExtension extends ControllerExtension {
 
         for (int i = 0; i < 8; i++) {
             setUpChannelControl(i, mixerTrackBank.getItemAt(i));
-        }
-    }
-
-    // Uses cursorDevice (follows actual user selection, including into Drum Machine/Rack chains)
-    // instead of a track-level DeviceBank, which matched KK plugins indiscriminately — including
-    // wrong instances inside containers (fixing wrong plugin shown in nested chains).
-    // The name observer triggers NKS state clearing when the cursor moves to a non-KK device,
-    // so the hardware returns to DAW mode instead of showing a stale plugin.
-    private void initNksDiscovery(final PinnableCursorDevice cursorDevice) {
-        cursorDevice.name().addValueObserver(name -> midiProcessor.onCursorDeviceChanged());
-
-        for (final NksDevice deviceType : NksDevice.values()) {
-            final SpecificPluginDevice specDevice = deviceType.createSpecDevice(cursorDevice);
-            final Parameter instId = specDevice.createParameter(deviceType.getParamOffset());
-            instId.name().addValueObserver(name -> midiProcessor.registerNksParam(deviceType, name));
         }
     }
 
