@@ -40,14 +40,17 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
     protected ScrollbarModel horizontalScrollbarModel;
     protected double scrubDistance;
     protected Arranger arranger;
+    private final boolean isNksConnect;
+
     private MidiIn midiIn2;
 
     private boolean footswitch1TipPending = false;
     private boolean footswitch1RingPending = false;
 
-    public KontrolSMk3Extension(final AbstractKompleteKontrolExtensionDefinition definition,
-        final ControllerHost host) {
+    public KontrolSMk3Extension(final AbstractKompleteKontrolExtensionDefinition definition, final ControllerHost host,
+        final boolean isNksConnect) {
         super(definition, host);
+        this.isNksConnect = isNksConnect;
     }
 
     @Override
@@ -71,13 +74,13 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
         navigationLayer = new Layer(layers, "NavigationLayer");
         clipSceneCursor = viewControl.getClipSceneCursor();
 
-        midiIn2 = host.getMidiInPort(1);
-        final NoteInput noteInput =
-            midiIn2.createNoteInput(
+        if (!isNksConnect) {
+            midiIn2 = host.getMidiInPort(1);
+            final NoteInput noteInput = midiIn2.createNoteInput(
                 "MIDI", "80????", "90????", "A0????", "D0????", "E0????", "B001??", "B00B??", "B040??", "B042??",
                 "B1????");
-        noteInput.setShouldConsumeEvents(true);
-
+            noteInput.setShouldConsumeEvents(true);
+        }
         initTrackBank();
         setUpTransport();
 

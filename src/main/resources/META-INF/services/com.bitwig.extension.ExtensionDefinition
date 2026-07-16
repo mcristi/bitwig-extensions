@@ -3,5 +3,6 @@ com.bitwig.extensions.controllers.akai.lpd8_mkii.LPD8MKIIExtensionDefinition
 com.bitwig.extensions.controllers.akai.midimix.MidiMixExtensionDefinition
 
 com.bitwig.extensions.controllers.nativeinstruments.komplete.definition.KontrolSMk3ExtensionDefinition
+com.bitwig.extensions.controllers.nativeinstruments.komplete.definition.NksConnectExtensionDefinition
 
 com.bitwig.extensions.controllers.paintaudio.midicaptain.PaintAudioMidiCaptainExtensionDefinition
