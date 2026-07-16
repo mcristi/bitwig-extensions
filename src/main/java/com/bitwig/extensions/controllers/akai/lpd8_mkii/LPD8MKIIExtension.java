@@ -54,37 +54,10 @@ public class LPD8MKIIExtension extends ControllerExtension
     {
         if (status == CONTROL_CHANGE && data2 == ON)
         {
-            switch (data1)
-            {
-                case PAD_01:
-                    triggerDrumPad(0);
-                    break;
-                case PAD_02:
-                    triggerDrumPad(1);
-                    break;
-                case PAD_03:
-                    triggerDrumPad(2);
-                    break;
-                case PAD_04:
-                    triggerDrumPad(3);
-                    break;
-            }
+            // Handle control change messages
         } else if (status == PROGRAM_CHANGE) {
-            // Handle program change messages if needed
+            // Handle program change messages
         }
-    }
-
-    /**
-     * Note messages could be used directly from controller,
-     * but we trigger the notes programmatically via CC messages
-     * to have the top 4 for other FX and the bottom 4 pads for the drum pad
-     */
-    private void triggerDrumPad(int index)
-    {
-        // Send MIDI note to trigger the drum pad (C1 = 36 is typically the first pad)
-        noteInput.sendRawMidiEvent(Midi.NOTE_ON, 36 + index, 100);
-        // Send note off after a short duration
-        host.scheduleTask(() -> noteInput.sendRawMidiEvent(Midi.NOTE_OFF, 36 + index, 0), 100);
     }
 
     private void onSysex(String data)
