@@ -48,7 +48,7 @@ public class MidiMixExtension extends ControllerExtension
     private static final int TOTAL_PADS = 128;
     private static final double VOLUME_0DB = 0.7937005259840997;
     private static final int NUM_SENDS = 3;
-    private static final String[] ROW2_OVERRIDE_PATTERNS = {"snare", "clap", "rim"};
+    private static final String[] ROW2_OVERRIDE_PATTERNS = {"snare", "clap", "rim", "perc"};
 
     private ControllerHost host;
     private MidiOut midiOut;
