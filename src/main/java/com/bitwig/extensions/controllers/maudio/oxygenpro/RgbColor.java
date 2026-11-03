@@ -1,9 +1,8 @@
 package com.bitwig.extensions.controllers.maudio.oxygenpro;
 
-import java.awt.Color;
-
 import com.bitwig.extension.controller.api.HardwareLightVisualState;
 import com.bitwig.extension.controller.api.InternalHardwareLightState;
+import com.bitwig.extensions.util.ColorUtils;
 
 public class RgbColor extends InternalHardwareLightState {
    private static final int BLINK = 64;
@@ -113,7 +112,7 @@ public class RgbColor extends InternalHardwareLightState {
 
    private static Hsb rgbToHsb(final int rv, final int gv, final int bv) {
       final float[] hsbValues = new float[3];
-      Color.RGBtoHSB(rv, gv, bv, hsbValues);
+      ColorUtils.rgbToHsb(rv, gv, bv, hsbValues);
       final int hr = Math.round(hsbValues[0] * 15) + 1;
       final int hg = Math.round(hsbValues[1] * 15);
       final int hb = Math.round(hsbValues[2] * 15);

@@ -4,8 +4,8 @@ import com.bitwig.extension.controller.api.HardwareLightVisualState;
 import com.bitwig.extension.controller.api.InternalHardwareLightState;
 import com.bitwig.extensions.controllers.nativeinstruments.commons.ColorBrightness;
 import com.bitwig.extensions.controllers.nativeinstruments.commons.Colors;
+import com.bitwig.extensions.util.ColorUtils;
 
-import java.awt.*;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -122,7 +122,7 @@ public class RgbColor extends InternalHardwareLightState {
 
    private static Hsb rgbToHsb(final int rv, final int gv, final int bv) {
       float[] hsbValues = new float[3];
-      Color.RGBtoHSB(rv, gv, bv, hsbValues);
+      ColorUtils.rgbToHsb(rv, gv, bv, hsbValues);
       int hr = Math.round(hsbValues[0] * 15) + 1;
       int hg = Math.round(hsbValues[1] * 15);
       int hb = Math.round(hsbValues[2] * 15);

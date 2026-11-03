@@ -1,8 +1,8 @@
 package com.bitwig.extensions.controllers.nativeinstruments.maschine;
 
 import com.bitwig.extension.controller.api.SettableColorValue;
+import com.bitwig.extensions.util.ColorUtils;
 
-import java.awt.*;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -155,7 +155,7 @@ public class NIColorUtil {
 
    private static Hsb rgbToHsb(final int rv, final int gv, final int bv) {
       float[] hsbValues = new float[3];
-      Color.RGBtoHSB(rv, gv, bv, hsbValues);
+      ColorUtils.rgbToHsb(rv, gv, bv, hsbValues);
       int hr = Math.round(hsbValues[0] * 15) + 1;
       int hg = Math.round(hsbValues[1] * 15);
       int hb = Math.round(hsbValues[2] * 15);
