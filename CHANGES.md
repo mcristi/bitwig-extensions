@@ -26,6 +26,7 @@
 #### Device control buttons + LEDs changes
 - `BUTTON 6` - pin both track and device
 - `LED 6` - both track and device are pinned
+- `SHIFT + BUTTON 6`- toggle playhead follow
 
 - `BUTTON 7` - toggle  MIX / EDIT panel layout
 - `LED 7` - EDIT panel is selected

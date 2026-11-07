@@ -1,6 +1,8 @@
 package com.bitwig.extensions.controllers.akai.apc40_mkii;
 
 import com.bitwig.extension.controller.ControllerExtensionDefinition;
+import com.bitwig.extension.controller.api.Action;
+import com.bitwig.extension.controller.api.Arranger;
 import com.bitwig.extension.controller.api.ClipLauncherSlot;
 import com.bitwig.extension.controller.api.ClipLauncherSlotBank;
 import com.bitwig.extension.controller.api.ControllerHost;
@@ -20,6 +22,8 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
    private Layer mPanSelectLayer;
    private DetailEditor mDetailEditor;
    private MasterRecorder mMasterRecorder;
+   private Arranger mArranger;
+   private Action mTogglePlaybackFollowAction;
 
    private final DoublePressedButtonState mPanOn = new DoublePressedButtonState();
 
@@ -37,13 +41,18 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
 
       mMasterRecorder = host.createMasterRecorder();
       mDetailEditor = host.createDetailEditor();
+      mArranger = host.createArranger();
 
       super.init();
 
       mTrackCursor.isPinned().markInterested();
       mDeviceCursor.isPlugin().markInterested();
-
+      mArranger.isPlaybackFollowEnabled().markInterested();
       mApplication.panelLayout().markInterested();
+
+      // The API has no playback-follow for the detail (clip) editor, so use
+      // Bitwig's global action, which applies to the focused panel.
+      mTogglePlaybackFollowAction = mApplication.getAction("toggle_playhead_follow");
    }
 
    @Override
@@ -124,6 +133,14 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
       mShiftLayer.bindPressed(nudgePlusButton, () -> {
          if (mTrackCursor.isGroup().get())
             mApplication.navigateIntoTrackGroup(mTrackCursor);
+      });
+
+      // button 6
+      mShiftLayer.bindPressed(mDeviceLockButton, () -> {
+         if (mTogglePlaybackFollowAction != null)
+            mTogglePlaybackFollowAction.invoke();
+         else
+            mArranger.isPlaybackFollowEnabled().toggle();
       });
 
       // button 7
