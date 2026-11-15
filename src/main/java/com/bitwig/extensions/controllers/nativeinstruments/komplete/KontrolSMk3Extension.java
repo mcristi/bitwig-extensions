@@ -77,8 +77,18 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
         if (!isNksConnect) {
             midiIn2 = host.getMidiInPort(1);
             final NoteInput noteInput = midiIn2.createNoteInput(
-                "MIDI", "80????", "90????", "A0????", "D0????", "E0????", "B001??", "B00B??", "B040??", "B042??",
-                "B1????");
+                "MIDI",
+                "8?????",  // Note Off, all channels
+                "9?????",  // Note On, all channels
+                "A0????",
+                "D0????",
+                "E0????",
+                "B001??",
+                "B00B??",
+                "B040??",
+                "B042??",
+                "B1????"
+            );
             noteInput.setShouldConsumeEvents(true);
         }
         initTrackBank();
