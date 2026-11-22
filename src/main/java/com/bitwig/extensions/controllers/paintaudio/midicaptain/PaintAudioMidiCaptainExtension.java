@@ -140,6 +140,7 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
 
                 ClipLauncherSlotBank clipLauncherSlotBank = track.clipLauncherSlotBank();
                 clipLauncherSlotBank.getItemAt(j).isPlaying().markInterested();
+                clipLauncherSlotBank.getItemAt(j).isRecording().markInterested();
             }
         }
 
@@ -411,15 +412,17 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
                 break;
 
             case EXP1:
-                if (this.expressionMode == ExpressionMode.VOLUME) {
-                    TrackUtils.setVolume(trackBank, cursorTrack, data2);
-                } else if (this.expressionMode == ExpressionMode.DEVICE_PARAM_1) {
-                    DeviceUtils.setParameter(cursorRemoteControlsPage, 0, data2);
-                } else if (this.expressionMode == ExpressionMode.DEVICE_PARAM_2) {
-                    DeviceUtils.setParameter(cursorRemoteControlsPage, 1, data2);
-                } else if (this.expressionMode == ExpressionMode.PAN) {
-                    TrackUtils.setPan(trackBank, cursorTrack, data2);
-                }
+                handleExpression(this.expressionMode, data2);
+                break;
+
+            case EXP2:
+                // The second pedal controls the counterpart of the first one
+                handleExpression(switch (this.expressionMode) {
+                    case VOLUME -> ExpressionMode.PAN;
+                    case PAN -> ExpressionMode.VOLUME;
+                    case DEVICE_PARAM_1 -> ExpressionMode.DEVICE_PARAM_2;
+                    case DEVICE_PARAM_2 -> ExpressionMode.DEVICE_PARAM_1;
+                }, data2);
                 break;
 
             case ENCODER:
@@ -435,6 +438,15 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
 
             default:
                 break;
+        }
+    }
+
+    private void handleExpression(ExpressionMode mode, int value) {
+        switch (mode) {
+            case VOLUME -> TrackUtils.setVolume(cursorTrack, value);
+            case PAN -> TrackUtils.setPan(cursorTrack, value);
+            case DEVICE_PARAM_1 -> DeviceUtils.setParameter(cursorRemoteControlsPage, 0, value);
+            case DEVICE_PARAM_2 -> DeviceUtils.setParameter(cursorRemoteControlsPage, 1, value);
         }
     }
 

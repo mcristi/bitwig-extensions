@@ -55,7 +55,7 @@ public class DeviceControl implements DeviceMidiListener {
         this.controlElements = controlElements;
         final PinnableCursorDevice cursorDevice = cursorTrack.createCursorDevice();
         cursorDevice.presetName().addValueObserver(this::handlePresetName);
-        
+
         this.mainBank = new BankControl(cursorDevice, this.midiProcessor, this, controlElements.getShiftHeld());
         this.mainBank.getCurrentFocus().addValueObserver(this::handleFocus);
         final BrowserHandler browserHandler = new BrowserHandler(host, cursorDevice, controlElements.getShiftHeld());

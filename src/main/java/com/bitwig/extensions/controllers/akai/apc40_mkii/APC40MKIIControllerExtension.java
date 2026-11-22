@@ -1129,6 +1129,8 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mSendsButton.releasedAction().setActionMatcher(mMidiIn.createNoteOffActionMatcher(0, BT_SENDS));
       mSendsButton.isPressed().addValueObserver(isPressed -> {
          mSendsOn.stateChanged(isPressed);
+         if (!isPressed)
+            mSendsOn.clear(); // hold only, no latch on double press
          if (mSendsOn.isOn())
             mSendSelectLayer.activate();
          else
@@ -1146,6 +1148,8 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mUserButton.releasedAction().setActionMatcher(mMidiIn.createNoteOffActionMatcher(0, BT_USER));
       mUserButton.isPressed().addValueObserver(isPressed -> {
          mUserOn.stateChanged(isPressed);
+         if (!isPressed)
+            mUserOn.clear(); // hold only, no latch on double press
          if (mUserOn.isOn())
             mProjectSelectLayer.activate();
          else

@@ -80,13 +80,13 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
                 "MIDI",
                 "8?????",  // Note Off, all channels
                 "9?????",  // Note On, all channels
-                "A0????",
-                "D0????",
-                "E0????",
-                "B001??",
-                "B00B??",
-                "B040??",
-                "B042??",
+                "A?????",  // Poly aftertouch, all channels
+                "D?????",  // Channel aftertouch, all channels
+                "E?????",  // Pitch bend, all channels
+                "B?01??",  // Mod wheel, all channels
+                "B?0B??",  // Expression, all channels
+                "B?40??",  // Sustain, all channels
+                "B?42??",  // Sostenuto, all channels
                 "B1????"
             );
             noteInput.setShouldConsumeEvents(true);
@@ -101,6 +101,8 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
         activateStandardLayers();
 
         application = host.createApplication();
+        // Default until the layout observer reports Arrange; the Edit layout keeps the last focus
+        updateFocusMode(FocusMode.LAUNCHER.getDescriptor());
         application.panelLayout().addValueObserver((layout) -> {
             if (layout.equals(PANEL_LAYOUT_ARRANGE)) {
                 this.updateFocusMode(FocusMode.ARRANGER.getDescriptor());
@@ -244,7 +246,9 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
         mainLayer.bindPressed(knobPressed.getHwButton(), () -> clipSceneCursor.launch());
         mainLayer.bindPressed(knobShiftPressed.getHwButton(), () -> handle4DShiftPressed(rootTrack, cursorTrack));
 
-        initDigiTechFS3XLooper();
+        if (midiIn2 != null) { // not opened for NKS Connect, so no footswitch there
+            initDigiTechFS3XLooper();
+        }
     }
 
     private void initDigiTechFS3XLooper() {

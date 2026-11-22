@@ -7,8 +7,8 @@
 - `PLAY` - restore automation override (automation is overridden - LED on)
 - `RECORD` - toggle arranger recording
 - `SESSION` - toggle master recording
-- `NUDGE+` - undo
-- `NUDGE-` - redo
+- `NUDGE-` - undo
+- `NUDGE+` - redo
 
 #### Shift layer
 - `SHIFT + NUDGE-` - exit track folder
@@ -18,6 +18,7 @@
 - `SHIFT + SENDS` - select sends tracks only if shift is pressed
 
 #### Clip actions
+PAN / SEND / USER act only while held (double press no longer latches them).
 - `PAN + CLIP` - select clip
 - `SEND + CLIP` - duplicate clip
 - `USER + CLIP` - delete clip

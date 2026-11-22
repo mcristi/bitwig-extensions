@@ -221,6 +221,8 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
    {
       mPanButton.isPressed().addValueObserver(isPressed -> {
          mPanOn.stateChanged(isPressed);
+         if (!isPressed)
+            mPanOn.clear(); // hold only, no latch on double press
          if (mPanOn.isOn())
             mPanSelectLayer.activate();
          else

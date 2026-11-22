@@ -13,17 +13,21 @@ public class SceneUtils {
     }
 
     public static void launchNext(Application application, SceneBank sceneBank, TrackBank trackBank) {
-        int currentSceneIndex = SceneUtils.getCurrentSceneIndex(trackBank);
-        sceneBank.launchScene(currentSceneIndex == Globals.NUMBER_OF_SCENES - 1 ? currentSceneIndex : currentSceneIndex + 1);
+        // -1 when nothing is playing, so the first press launches the first scene
+        int nextSceneIndex = SceneUtils.getCurrentSceneIndex(trackBank) + 1;
+        if (nextSceneIndex < sceneBank.getSizeOfBank() && sceneBank.getScene(nextSceneIndex).exists().get()) {
+            sceneBank.launchScene(nextSceneIndex);
+        }
         application.setPanelLayout(PANEL_LAYOUT_MIX);
     }
 
     public static void launchPrev(Application application, SceneBank sceneBank, TrackBank trackBank) {
         int currentSceneIndex = SceneUtils.getCurrentSceneIndex(trackBank);
-        sceneBank.launchScene(currentSceneIndex == 0 ? 0 : currentSceneIndex - 1);
+        sceneBank.launchScene(Math.max(0, currentSceneIndex - 1));
         application.setPanelLayout(PANEL_LAYOUT_MIX);
     }
 
+    /** Index of the first scene with a playing clip, or -1 if nothing is playing. */
     private static int getCurrentSceneIndex(TrackBank trackBank) {
         for (int i = 0; i < Globals.NUMBER_OF_SCENES; i++) {
             boolean isScenePlaying = false;
@@ -39,7 +43,7 @@ public class SceneUtils {
             }
         }
 
-        return 0;
+        return -1;
     }
 
 }

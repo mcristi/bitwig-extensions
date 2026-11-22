@@ -17,19 +17,16 @@ public class TrackUtils {
         trackBank.getItemAt(trackIndex).sendBank().getItemAt(sendIndex).set(value, 128);
     }
 
-    public static void setVolume(TrackBank trackBank, CursorTrack cursorTrack, int value) {
-        int trackPosition = cursorTrack.position().get();
-        trackBank.getItemAt(trackPosition).volume().set(value, 128);
+    public static void setVolume(CursorTrack cursorTrack, int value) {
+        cursorTrack.volume().set(value, 128);
     }
 
-    public static void setPan(TrackBank trackBank, CursorTrack cursorTrack, int value) {
-        int trackPosition = cursorTrack.position().get();
-        trackBank.getItemAt(trackPosition).pan().set(value, 128);
+    public static void setPan(CursorTrack cursorTrack, int value) {
+        cursorTrack.pan().set(value, 128);
     }
 
-    public static void stop(TrackBank trackBank, CursorTrack cursorTrack) {
-        int trackPosition = cursorTrack.position().get();
-        trackBank.getItemAt(trackPosition).stop();
+    public static void stop(CursorTrack cursorTrack) {
+        cursorTrack.stop();
     }
 
     public static void unarmAll(TrackBank trackBank) {
