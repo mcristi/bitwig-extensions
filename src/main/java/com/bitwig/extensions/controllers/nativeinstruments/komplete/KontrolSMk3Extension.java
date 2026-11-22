@@ -244,7 +244,6 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
         final Clip arrangerClip = getHost().createArrangerCursorClip(8, 128);
 
         arrangerClip.exists().markInterested();
-        final Track rootTrack = viewControl.getProject().getRootTrackGroup();
         final CursorTrack cursorTrack = clipSceneCursor.getCursorTrack();
         final Application application = viewControl.getApplication();
         final NavigationState navigationState = viewControl.getNavigationState();
@@ -296,14 +295,12 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
             }
         });
 
-        // SHIFT + press switches the note editor mode in the EDIT layout and stops the track elsewhere.
+        // SHIFT + press no longer stops the track. In the EDIT layout it switches the note editor mode.
         // The API has no editor-mode setter or getter, so use Bitwig's actions and track the mode here.
         final Action showPianoRollAction = application.getAction("show_piano_roll_editor_mode");
         final Action showDrumEditorAction = application.getAction("show_pattern_editor_mode");
         mainLayer.bindPressed(knobShiftPressed.getHwButton(), () -> {
-            if (!PANEL_LAYOUT_EDIT.equals(panelLayout)) {
-                handle4DShiftPressed(rootTrack, cursorTrack);
-            } else if (showPianoRollAction != null && showDrumEditorAction != null) {
+            if (PANEL_LAYOUT_EDIT.equals(panelLayout) && showPianoRollAction != null && showDrumEditorAction != null) {
                 drumEditorShown = !drumEditorShown;
                 (drumEditorShown ? showDrumEditorAction : showPianoRollAction).invoke();
             }

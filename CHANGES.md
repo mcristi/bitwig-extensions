@@ -45,7 +45,8 @@ PAN / SEND / USER act only while held (double press no longer latches them).
 - `SHIFT` + `RECORD` - toggle current track arm (LAUNCHER focus)
 - `AUTO` - restore automation (LAUNCHER focus)
 - 4D encoder press - no longer launches the clip / scene; in EDIT it zooms the detail editor to fit (selection or all), nothing in MIX / ARRANGE
-- `SHIFT` + 4D encoder press - in EDIT switch between the Piano Roll and the Drum/Hybrid editor; in MIX / ARRANGE stop the track (as upstream)
+- `SHIFT` + 4D encoder press - no longer stops the track / all tracks; in EDIT it switches between the Piano Roll and the Drum/Hybrid editor, nothing in MIX / ARRANGE
+- While the browser is open, the 4D encoder keeps its upstream behaviour: press confirms, `SHIFT` + press cancels, turn scrolls the selection
 - 4D encoder turn - scrub the play position in ARRANGE, zoom the detail editor in EDIT, nothing in MIX
 - `SHIFT` + 4D encoder turn - zoom the arranger in ARRANGE, zoom the key heights of the detail editor in EDIT (to bring more pitches into view), nothing in MIX (the track volume and pan bindings are removed)
 - Keyboard port: notes, pitch bend, aftertouch, mod wheel, expression, sustain and sostenuto pass on all MIDI channels (for split templates); all CCs pass on channel 2
