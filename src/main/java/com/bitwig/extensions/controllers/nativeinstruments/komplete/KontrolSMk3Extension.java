@@ -40,6 +40,9 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
 
     private MidiIn midiIn2;
 
+    // Zoom amount for an encoder movement that used to sweep the whole volume range
+    private static final double SHIFT_FOUR_D_ZOOM_SENSITIVITY = 32;
+
     private boolean footswitch1TipPending = false;
     private boolean footswitch1RingPending = false;
 
@@ -115,7 +118,8 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
 
         final CursorTrack cursorTrack = viewControl.getCursorTrack();
         final RelativeHardwareKnob daw4dKnob = controlElements.getFourDKnobMixer();
-        mainLayer.addBinding(new EncoderParameterBinding(daw4dKnob, cursorTrack.volume()));
+        // The keyboard sends this for SHIFT + 4D encoder. No track volume here; it zooms the arranger instead.
+        mainLayer.bind(daw4dKnob, getHost().createRelativeHardwareControlAdjustmentTarget(this::handleShiftFourDAdjustment));
         final RelativeHardwareKnob daw4dPan = controlElements.getFourDKnobPan();
         mainLayer.addBinding(new EncoderParameterBinding(daw4dPan, cursorTrack.pan()));
 
@@ -142,6 +146,14 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
         } else {
             handlePositionIncrementWithFocus(inc);
         }
+    }
+
+    private void handleShiftFourDAdjustment(final double adjustment) {
+        if (currentLayoutType != LayoutType.ARRANGER) {
+            return;
+        }
+        final double position = viewControl.getTransport().getPosition().get();
+        horizontalScrollbarModel.zoomAtPosition(position, adjustment * SHIFT_FOUR_D_ZOOM_SENSITIVITY);
     }
 
     private void handlePositionIncrementWithFocus(final int inc) {

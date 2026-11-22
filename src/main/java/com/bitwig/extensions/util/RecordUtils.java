@@ -24,8 +24,6 @@ public class RecordUtils
     public static void recordClip(ControllerHost host, Application application,
                                   TrackBank trackBank, DetailEditor detailEditor, Transport transport,
                                   Clip cursorClip, boolean quantizeClipLengthAfterRecord) {
-        ApplicationUtils.showEditLayout(application);
-
         // Stop every recording clip, not just the selected one
         final List<ClipLauncherSlot> recordingSlots = new ArrayList<>();
         for (int i = 0; i < trackBank.getSizeOfBank(); i++) {
@@ -40,6 +38,7 @@ public class RecordUtils
         }
 
         if (!recordingSlots.isEmpty()) {
+            ApplicationUtils.showEditLayout(application);
             host.scheduleTask(detailEditor::zoomToFit, Globals.VISUAL_FEEDBACK_TIMEOUT);
 
             if (quantizeClipLengthAfterRecord) {
@@ -48,10 +47,16 @@ public class RecordUtils
             return;
         }
 
+        // Only switch to the edit layout when a recording actually starts
+        boolean layoutShown = false;
         for (int i = 0; i < Globals.NUMBER_OF_TRACKS; i++) {
             final Track track = trackBank.getItemAt(i);
 
             if (track.arm().get()) {
+                if (!layoutShown) {
+                    ApplicationUtils.showEditLayout(application);
+                    layoutShown = true;
+                }
                 track.recordNewLauncherClip(0);
 
                 // TODO: enable Follow Playback. No API currently
