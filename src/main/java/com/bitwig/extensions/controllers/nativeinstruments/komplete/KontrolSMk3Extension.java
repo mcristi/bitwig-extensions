@@ -1,5 +1,6 @@
 package com.bitwig.extensions.controllers.nativeinstruments.komplete;
 
+import com.bitwig.extension.controller.api.Action;
 import com.bitwig.extension.controller.api.Application;
 import com.bitwig.extension.controller.api.Arranger;
 import com.bitwig.extension.controller.api.Clip;
@@ -18,7 +19,6 @@ import com.bitwig.extension.controller.api.TrackBank;
 import com.bitwig.extension.controller.api.Transport;
 import com.bitwig.extensions.CommonState;
 import com.bitwig.extensions.Globals;
-import com.bitwig.extensions.controllers.nativeinstruments.komplete.binding.EncoderParameterBinding;
 import com.bitwig.extensions.controllers.nativeinstruments.komplete.control.ModeButton;
 import com.bitwig.extensions.controllers.nativeinstruments.komplete.definition.AbstractKompleteKontrolExtensionDefinition;
 import com.bitwig.extensions.controllers.nativeinstruments.komplete.device.DeviceControl;
@@ -28,6 +28,7 @@ import com.bitwig.extensions.framework.values.FocusMode;
 import com.bitwig.extensions.util.ClipUtils;
 import com.bitwig.extensions.util.RecordUtils;
 import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_ARRANGE;
+import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_EDIT;
 import static com.bitwig.extension.controller.api.Application.PANEL_LAYOUT_MIX;
 
 public class KontrolSMk3Extension extends KompleteKontrolExtension {
@@ -40,8 +41,15 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
 
     private MidiIn midiIn2;
 
-    // Zoom amount for an encoder movement that used to sweep the whole volume range
+    // Arranger zoom amount for an encoder movement that used to sweep the whole volume range
     private static final double SHIFT_FOUR_D_ZOOM_SENSITIVITY = 32;
+
+    // Encoder movement (as a fraction of that same sweep) per key-height zoom step in the detail editor
+    private static final double SHIFT_FOUR_D_LANE_ZOOM_STEP = 1 / 128.0;
+
+    private String panelLayout = PANEL_LAYOUT_MIX;
+    private double laneZoomAccumulator = 0;
+    private boolean drumEditorShown = false;
 
     private boolean footswitch1TipPending = false;
     private boolean footswitch1RingPending = false;
@@ -63,6 +71,7 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
         final ControllerHost host = getHost();
 
         this.arranger = host.createArranger();
+        detailEditor = host.createDetailEditor();
         horizontalScrollbarModel = this.arranger.getHorizontalScrollbarModel();
         horizontalScrollbarModel.getContentPerPixel().addValueObserver(this::handleZoomLevel);
         midiProcessor.intoDawMode(0x4);
@@ -116,12 +125,12 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
         final RelativeHardwarControlBindable binding = midiProcessor.createIncAction(this::handleFourDInc);
         mainLayer.bind(fourDKnob, binding);
 
-        final CursorTrack cursorTrack = viewControl.getCursorTrack();
-        final RelativeHardwareKnob daw4dKnob = controlElements.getFourDKnobMixer();
-        // The keyboard sends this for SHIFT + 4D encoder. No track volume here; it zooms the arranger instead.
-        mainLayer.bind(daw4dKnob, getHost().createRelativeHardwareControlAdjustmentTarget(this::handleShiftFourDAdjustment));
-        final RelativeHardwareKnob daw4dPan = controlElements.getFourDKnobPan();
-        mainLayer.addBinding(new EncoderParameterBinding(daw4dPan, cursorTrack.pan()));
+        // The keyboard sends its "selected track volume" / "selected track pan" messages for SHIFT + 4D encoder.
+        // Neither changes the track here; both zoom instead.
+        mainLayer.bind(controlElements.getFourDKnobMixer(),
+            getHost().createRelativeHardwareControlAdjustmentTarget(this::handleShiftFourDAdjustment));
+        mainLayer.bind(controlElements.getFourDKnobPan(),
+            getHost().createRelativeHardwareControlAdjustmentTarget(this::handleShiftFourDAdjustment));
 
         final RelativeHardwareKnob loopKnob = controlElements.getLoopModKnob();
         mainLayer.bind(loopKnob, midiProcessor.createIncAction(this::handleLoop));
@@ -136,6 +145,24 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
     }
 
     private void handleFourDInc(final int inc) {
+        if (PANEL_LAYOUT_EDIT.equals(panelLayout)) {
+            // In DAW mode the keyboard sends the same message with and without SHIFT
+            if (controlElements.getShiftHeld().get()) {
+                if (inc > 0) {
+                    detailEditor.zoomInLaneHeights();
+                } else {
+                    detailEditor.zoomOutLaneHeights();
+                }
+            } else if (inc > 0) {
+                detailEditor.zoomIn();
+            } else {
+                detailEditor.zoomOut();
+            }
+            return;
+        }
+        if (!PANEL_LAYOUT_ARRANGE.equals(panelLayout)) {
+            return; // no scrubbing while the arranger timeline is not visible
+        }
         if (controlElements.getShiftHeld().get()) {
             final double newPos = viewControl.getTransport().getPosition().get();
             if (inc > 0) {
@@ -149,11 +176,22 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
     }
 
     private void handleShiftFourDAdjustment(final double adjustment) {
-        if (currentLayoutType != LayoutType.ARRANGER) {
-            return;
+        if (PANEL_LAYOUT_ARRANGE.equals(panelLayout)) {
+            final double position = viewControl.getTransport().getPosition().get();
+            horizontalScrollbarModel.zoomAtPosition(position, adjustment * SHIFT_FOUR_D_ZOOM_SENSITIVITY);
+        } else if (PANEL_LAYOUT_EDIT.equals(panelLayout)) {
+            // The editor cannot be scrolled vertically, so zoom the key heights to bring more pitches into view.
+            // It only zooms in whole steps.
+            laneZoomAccumulator += adjustment;
+            while (laneZoomAccumulator >= SHIFT_FOUR_D_LANE_ZOOM_STEP) {
+                laneZoomAccumulator -= SHIFT_FOUR_D_LANE_ZOOM_STEP;
+                detailEditor.zoomInLaneHeights();
+            }
+            while (laneZoomAccumulator <= -SHIFT_FOUR_D_LANE_ZOOM_STEP) {
+                laneZoomAccumulator += SHIFT_FOUR_D_LANE_ZOOM_STEP;
+                detailEditor.zoomOutLaneHeights();
+            }
         }
-        final double position = viewControl.getTransport().getPosition().get();
-        horizontalScrollbarModel.zoomAtPosition(position, adjustment * SHIFT_FOUR_D_ZOOM_SENSITIVITY);
     }
 
     private void handlePositionIncrementWithFocus(final int inc) {
@@ -251,8 +289,25 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
             .setValueSupplier(() -> cursorTrack.canHoldNoteData().get() && cursorClip.exists().get());
         final ModeButton knobPressed = controlElements.getKnobPressed();
         final ModeButton knobShiftPressed = controlElements.getKnobShiftPressed();
-        mainLayer.bindPressed(knobPressed.getHwButton(), () -> clipSceneCursor.launch());
-        mainLayer.bindPressed(knobShiftPressed.getHwButton(), () -> handle4DShiftPressed(rootTrack, cursorTrack));
+        // Pressing the encoder no longer launches clips. In the EDIT layout it zooms the editor to fit.
+        mainLayer.bindPressed(knobPressed.getHwButton(), () -> {
+            if (PANEL_LAYOUT_EDIT.equals(panelLayout)) {
+                detailEditor.zoomToFitSelectionOrAll();
+            }
+        });
+
+        // SHIFT + press switches the note editor mode in the EDIT layout and stops the track elsewhere.
+        // The API has no editor-mode setter or getter, so use Bitwig's actions and track the mode here.
+        final Action showPianoRollAction = application.getAction("show_piano_roll_editor_mode");
+        final Action showDrumEditorAction = application.getAction("show_pattern_editor_mode");
+        mainLayer.bindPressed(knobShiftPressed.getHwButton(), () -> {
+            if (!PANEL_LAYOUT_EDIT.equals(panelLayout)) {
+                handle4DShiftPressed(rootTrack, cursorTrack);
+            } else if (showPianoRollAction != null && showDrumEditorAction != null) {
+                drumEditorShown = !drumEditorShown;
+                (drumEditorShown ? showDrumEditorAction : showPianoRollAction).invoke();
+            }
+        });
 
         if (midiIn2 != null) { // not opened for NKS Connect, so no footswitch there
             initDigiTechFS3XLooper();
@@ -274,8 +329,6 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
 
         final Transport transport = viewControl.getTransport();
         transport.defaultLaunchQuantization().markInterested();
-
-        detailEditor = getHost().createDetailEditor();
 
         TrackBank trackBank = getHost().createTrackBank(Globals.NUMBER_OF_TRACKS, Globals.NUMBER_OF_SENDS, Globals.NUMBER_OF_SCENES);
 
@@ -342,6 +395,8 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
     }
 
     private void handleLayoutChange(final String v) {
+        panelLayout = v;
+        laneZoomAccumulator = 0;
         currentLayoutType = LayoutType.toType(v);
         midiProcessor.sendLayoutCommand(currentLayoutType);
     }

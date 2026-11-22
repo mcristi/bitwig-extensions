@@ -39,7 +39,7 @@ public class RecordUtils
 
         if (!recordingSlots.isEmpty()) {
             ApplicationUtils.showEditLayout(application);
-            host.scheduleTask(detailEditor::zoomToFit, Globals.VISUAL_FEEDBACK_TIMEOUT);
+            host.scheduleTask(detailEditor::zoomToFitSelectionOrAll, Globals.VISUAL_FEEDBACK_TIMEOUT);
 
             if (quantizeClipLengthAfterRecord) {
                 quantizeWhenStopped(host, detailEditor, transport, cursorClip, recordingSlots, RECORDING_END_MAX_POLLS);
@@ -84,7 +84,7 @@ public class RecordUtils
     private static void quantizeNext(ControllerHost host, DetailEditor detailEditor, Transport transport,
                                      Clip cursorClip, List<ClipLauncherSlot> slots, int index) {
         if (index >= slots.size()) {
-            host.scheduleTask(detailEditor::zoomToFit, Globals.VISUAL_FEEDBACK_TIMEOUT);
+            host.scheduleTask(detailEditor::zoomToFitSelectionOrAll, Globals.VISUAL_FEEDBACK_TIMEOUT);
             return;
         }
 

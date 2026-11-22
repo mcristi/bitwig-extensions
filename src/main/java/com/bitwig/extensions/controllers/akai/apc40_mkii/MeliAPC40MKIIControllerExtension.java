@@ -110,7 +110,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
          } else {
             mApplication.setPanelLayout(PANEL_LAYOUT_MIX);
          }
-         host.scheduleTask(() -> mDetailEditor.zoomToFit(), Globals.VISUAL_FEEDBACK_TIMEOUT);
+         host.scheduleTask(() -> mDetailEditor.zoomToFitSelectionOrAll(), Globals.VISUAL_FEEDBACK_TIMEOUT);
       }, () -> "Next Sub Panel"));
       mMainLayer.bind(() -> mApplication.panelLayout().get().equals(PANEL_LAYOUT_EDIT), mClipDeviceViewLed);
 
@@ -211,7 +211,7 @@ class MeliAPC40MKIIControllerExtension extends APC40MKIIControllerExtension
                mApplication.setPanelLayout(PANEL_LAYOUT_EDIT);
                slot.select();
 
-               host.scheduleTask(() -> mDetailEditor.zoomToFit(), Globals.VISUAL_FEEDBACK_TIMEOUT);
+               host.scheduleTask(() -> mDetailEditor.zoomToFitSelectionOrAll(), Globals.VISUAL_FEEDBACK_TIMEOUT);
             });
          }
       }

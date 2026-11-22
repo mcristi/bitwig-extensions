@@ -413,7 +413,7 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
     private void alignPlayStartAndZoom() {
         host.scheduleTask(() -> {
             cursorClip.getPlayStart().set(cursorClip.getLoopStart().get());
-            detailEditor.zoomToFit();
+            detailEditor.zoomToFitSelectionOrAll();
         }, Globals.VISUAL_FEEDBACK_TIMEOUT);
     }
 
