@@ -207,52 +207,38 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
 //        }
 
         switch (data1) {
-            case B1:
+            case B1: // move the loop start
                 if (focusMode == FocusMode.MIX) {
-                    int loopIncrement = transport.defaultLaunchQuantization().get().equals("1/4") ? 4 : 1;
-
                     if (data2 == 1) {
-                        cursorClip.getLoopStart().inc(loopIncrement);
-                        cursorClip.getLoopLength().inc(-loopIncrement);
+                        cursorClip.getLoopStart().inc(loopIncrement());
+                        cursorClip.getLoopLength().inc(-loopIncrement());
                     } else if (data2 == 2) {
-                        cursorClip.getLoopStart().inc(-loopIncrement);
-                        cursorClip.getLoopLength().inc(loopIncrement);
+                        cursorClip.getLoopStart().inc(-loopIncrement());
+                        cursorClip.getLoopLength().inc(loopIncrement());
                     }
-                    host.scheduleTask(() -> {
-                        cursorClip.getPlayStart().set(cursorClip.getLoopStart().get());
-                        detailEditor.zoomToFit();
-                    }, Globals.VISUAL_FEEDBACK_TIMEOUT);
+                    alignPlayStartAndZoom();
                 } else {
-                    int loopIncrement = transport.defaultLaunchQuantization().get().equals("1/4") ? 4 : 1;
-
                     if (data2 == 1) {
-                        transport.arrangerLoopStart().inc(loopIncrement);
+                        transport.arrangerLoopStart().inc(loopIncrement());
                     } else if (data2 == 2) {
-                        transport.arrangerLoopStart().inc(-loopIncrement);
+                        transport.arrangerLoopStart().inc(-loopIncrement());
                     }
                 }
                 break;
 
-            case B2:
+            case B2: // change the loop length
                 if (focusMode == FocusMode.MIX) {
-                    int loopIncrement = transport.defaultLaunchQuantization().get().equals("1/4") ? 4 : 1;
-
                     if (data2 == 1) {
-                        cursorClip.getLoopLength().inc(-loopIncrement);
+                        cursorClip.getLoopLength().inc(-loopIncrement());
                     } else if (data2 == 2) {
-                        cursorClip.getLoopLength().inc(loopIncrement);
+                        cursorClip.getLoopLength().inc(loopIncrement());
                     }
-                    host.scheduleTask(() -> {
-                        cursorClip.getPlayStart().set(cursorClip.getLoopStart().get());
-                        detailEditor.zoomToFit();
-                    }, Globals.VISUAL_FEEDBACK_TIMEOUT);
+                    alignPlayStartAndZoom();
                 } else {
-                    int loopIncrement = transport.defaultLaunchQuantization().get().equals("1/4") ? 4 : 1;
-
                     if (data2 == 1) {
-                        transport.arrangerLoopDuration().inc(loopIncrement);
+                        transport.arrangerLoopDuration().inc(loopIncrement());
                     } else if (data2 == 2) {
-                        transport.arrangerLoopDuration().inc(-loopIncrement);
+                        transport.arrangerLoopDuration().inc(-loopIncrement());
                     }
                 }
                 break;
@@ -325,30 +311,14 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
                 // if MONO tracks (first 3) are deactivated, set the trackOffset to 3
                 int trackOffset = trackBank.getItemAt(0).isActivated().get() ? 0 : 3;
 
-                if (data2 == 1) {
+                if (data2 >= 1 && data2 <= 3) {
                     if (focusMode == FocusMode.MIX) {
                         ApplicationUtils.showMixLayout(application);
                     } else {
                         ApplicationUtils.showArrangerLayout(application);
                     }
 
-                    TrackUtils.arm(host, trackBank, cursorTrack, cursorDevice, trackOffset, this.openWindowOnArm);
-                } else if (data2 == 2) {
-                    if (focusMode == FocusMode.MIX) {
-                        ApplicationUtils.showMixLayout(application);
-                    } else {
-                        ApplicationUtils.showArrangerLayout(application);
-                    }
-
-                    TrackUtils.arm(host, trackBank, cursorTrack, cursorDevice, trackOffset + 1, this.openWindowOnArm);
-                } else if (data2 == 3) {
-                    if (focusMode == FocusMode.MIX) {
-                        ApplicationUtils.showMixLayout(application);
-                    } else {
-                        ApplicationUtils.showArrangerLayout(application);
-                    }
-
-                    TrackUtils.arm(host, trackBank, cursorTrack, cursorDevice, trackOffset + 2, this.openWindowOnArm);
+                    TrackUtils.arm(host, trackBank, cursorTrack, cursorDevice, trackOffset + data2 - 1, this.openWindowOnArm);
                 } else if (data2 == 50) {
                     if (trackOffset == 0) {
                         host.showPopupNotification("Use STEREO input");
@@ -426,19 +396,25 @@ public class PaintAudioMidiCaptainExtension extends ControllerExtension
                 break;
 
             case ENCODER:
-                // Map MIDI controller (0-127) to BPM range (53-180)
-                double bpm = 53 + (data2 / 127.0) * (180 - 53);
-                // Round to nearest integer (e.g., 66.0, 67.0, 68.0)
-                bpm = Math.round(bpm * 1) / 1.0;
-                // Normalize BPM to tempo range (20-666 BPM maps to 0-1)
-                double normalizedTempo = (bpm - 20) / (666 - 20);
-
-                transport.tempo().set(normalizedTempo);
+                // Map MIDI controller (0-127) to whole BPM values in the range 53-180
+                transport.tempo().value().setRaw(Math.round(53 + (data2 / 127.0) * (180 - 53)));
                 break;
 
             default:
                 break;
         }
+    }
+
+    /** Loop edits move by a bar when the launch quantization is 1/4, otherwise by a beat. */
+    private int loopIncrement() {
+        return transport.defaultLaunchQuantization().get().equals("1/4") ? Globals.BEATS_PER_BAR : 1;
+    }
+
+    private void alignPlayStartAndZoom() {
+        host.scheduleTask(() -> {
+            cursorClip.getPlayStart().set(cursorClip.getLoopStart().get());
+            detailEditor.zoomToFit();
+        }, Globals.VISUAL_FEEDBACK_TIMEOUT);
     }
 
     private void handleExpression(ExpressionMode mode, int value) {

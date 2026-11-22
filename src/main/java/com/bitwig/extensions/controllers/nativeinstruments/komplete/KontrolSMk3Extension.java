@@ -3,18 +3,14 @@ package com.bitwig.extensions.controllers.nativeinstruments.komplete;
 import com.bitwig.extension.controller.api.Application;
 import com.bitwig.extension.controller.api.Arranger;
 import com.bitwig.extension.controller.api.Clip;
-import com.bitwig.extension.controller.api.ClipLauncherSlot;
 import com.bitwig.extension.controller.api.ClipLauncherSlotBank;
 import com.bitwig.extension.controller.api.ControllerHost;
 import com.bitwig.extension.controller.api.CursorTrack;
 import com.bitwig.extension.controller.api.HardwareButton;
 import com.bitwig.extension.controller.api.MidiIn;
 import com.bitwig.extension.controller.api.NoteInput;
-import com.bitwig.extension.controller.api.Project;
 import com.bitwig.extension.controller.api.RelativeHardwarControlBindable;
 import com.bitwig.extension.controller.api.RelativeHardwareKnob;
-import com.bitwig.extension.controller.api.Scene;
-import com.bitwig.extension.controller.api.SceneBank;
 import com.bitwig.extension.controller.api.ScrollbarModel;
 import com.bitwig.extension.controller.api.SettableBeatTimeValue;
 import com.bitwig.extension.controller.api.Track;
@@ -264,52 +260,28 @@ public class KontrolSMk3Extension extends KompleteKontrolExtension {
         final HardwareButton footswitch1ButtonRing = surface.createHardwareButton("FOOTSWITCH_1_RING");
         footswitch1ButtonRing.pressedAction().setActionMatcher(midiIn2.createCCActionMatcher(FOOTSWITCH_CHANNEL, FOOTSWITCH_CC_RING, FOOTSWITCH_ON_VALUE));
 
-        final Project project = viewControl.getProject();
         final Transport transport = viewControl.getTransport();
         transport.defaultLaunchQuantization().markInterested();
 
         detailEditor = getHost().createDetailEditor();
 
         TrackBank trackBank = getHost().createTrackBank(Globals.NUMBER_OF_TRACKS, Globals.NUMBER_OF_SENDS, Globals.NUMBER_OF_SCENES);
-        trackBank.itemCount().markInterested();
-
-        SceneBank sceneBank = trackBank.sceneBank();
 
         Clip cursorClip = getHost().createLauncherCursorClip(Globals.NUMBER_OF_TRACKS, Globals.NUMBER_OF_SCENES);
-        cursorClip.clipLauncherSlot().isRecording().markInterested();
+        cursorClip.getLoopLength().markInterested();
 
-        for (int i = 0; i < Globals.NUMBER_OF_SCENES; i++) {
-            final Scene scene = sceneBank.getScene(i);
-            scene.exists().markInterested();
-        }
-
+        // RecordUtils.recordClip reads the arm state of each track and the recording state of each slot
         for (int i = 0; i < Globals.NUMBER_OF_TRACKS; i++)
         {
             final Track track = trackBank.getItemAt(i);
             track.arm().markInterested();
-            track.trackType().markInterested();
-            track.exists().markInterested();
-            track.isActivated().markInterested();
 
             final ClipLauncherSlotBank clipLauncher = track.clipLauncherSlotBank();
-
             for (int j = 0; j < Globals.NUMBER_OF_SCENES; j++)
             {
-                final ClipLauncherSlot slot = clipLauncher.getItemAt(j);
-                slot.isPlaybackQueued().markInterested();
-                slot.hasContent().markInterested();
-                slot.isPlaying().markInterested();
-                slot.isRecording().markInterested();
-                slot.isRecordingQueued().markInterested();
-                slot.isStopQueued().markInterested();
-                slot.exists().markInterested();
+                clipLauncher.getItemAt(j).isRecording().markInterested();
             }
         }
-        cursorClip.exists().markInterested();
-        cursorClip.getLoopLength().markInterested();
-        cursorClip.getLoopStart().markInterested();
-        cursorClip.getPlayStart().markInterested();
-        cursorClip.getPlayStop().markInterested();
 
         mainLayer.bindPressed(footswitch1ButtonTip, () -> {
             if (footswitch1RingPending) {

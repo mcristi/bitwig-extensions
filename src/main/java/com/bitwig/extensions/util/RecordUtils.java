@@ -18,6 +18,9 @@ import java.util.List;
 
 public class RecordUtils
 {
+    private static final int RECORDING_END_POLL_INTERVAL = 100;
+    private static final int RECORDING_END_MAX_POLLS = 100; // give up waiting after 10 seconds
+
     public static void recordClip(ControllerHost host, Application application,
                                   TrackBank trackBank, DetailEditor detailEditor, Transport transport,
                                   Clip cursorClip, boolean quantizeClipLengthAfterRecord) {
@@ -40,8 +43,7 @@ public class RecordUtils
             host.scheduleTask(detailEditor::zoomToFit, Globals.VISUAL_FEEDBACK_TIMEOUT);
 
             if (quantizeClipLengthAfterRecord) {
-                // Delay length quantization to ensure the clips are launched
-                host.scheduleTask(() -> quantizeNext(host, detailEditor, transport, cursorClip, recordingSlots, 0), 1000);
+                quantizeWhenStopped(host, detailEditor, transport, cursorClip, recordingSlots, RECORDING_END_MAX_POLLS);
             }
             return;
         }
@@ -55,6 +57,19 @@ public class RecordUtils
                 // TODO: enable Follow Playback. No API currently
             }
         }
+    }
+
+    /** The clips keep recording until the launch quantization boundary, so wait for that before quantizing. */
+    private static void quantizeWhenStopped(ControllerHost host, DetailEditor detailEditor, Transport transport,
+                                            Clip cursorClip, List<ClipLauncherSlot> slots, int pollsLeft) {
+        final boolean stillRecording = slots.stream().anyMatch(slot -> slot.isRecording().get());
+        host.scheduleTask(() -> {
+            if (stillRecording && pollsLeft > 0) {
+                quantizeWhenStopped(host, detailEditor, transport, cursorClip, slots, pollsLeft - 1);
+            } else {
+                quantizeNext(host, detailEditor, transport, cursorClip, slots, 0);
+            }
+        }, RECORDING_END_POLL_INTERVAL);
     }
 
     /**

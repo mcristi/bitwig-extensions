@@ -30,14 +30,10 @@ public class TrackUtils {
     }
 
     public static void unarmAll(TrackBank trackBank) {
-        for (int i = 0; i < trackBank.itemCount().get(); i++) {
-            try {
-                Track track = trackBank.getItemAt(i);
-                if (track.exists().get()) {
-                    track.arm().set(false);
-                }
-            } catch (Exception e) {
-                break; // Stop iterating if we hit an invalid index
+        for (int i = 0; i < trackBank.getSizeOfBank(); i++) {
+            Track track = trackBank.getItemAt(i);
+            if (track.exists().get()) {
+                track.arm().set(false);
             }
         }
     }

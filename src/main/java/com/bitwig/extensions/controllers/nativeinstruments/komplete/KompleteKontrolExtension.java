@@ -268,9 +268,9 @@ public abstract class KompleteKontrolExtension extends ControllerExtension {
         mainLayer.bindPressed(controlElements.getSoloSelectedButton(), cursorTrack.solo().toggleAction());
 
         controlElements.getTrackNavLeftButton()
-            .bind(navigationLayer, () -> mixerTrackBank.scrollBy(-8), mixerTrackBank.canScrollChannelsDown());
+            .bind(navigationLayer, () -> mixerTrackBank.scrollBy(-8), mixerTrackBank.canScrollBackwards());
         controlElements.getTrackRightNavButton()
-            .bind(navigationLayer, () -> mixerTrackBank.scrollBy(8), mixerTrackBank.canScrollChannelsUp());
+            .bind(navigationLayer, () -> mixerTrackBank.scrollBy(8), mixerTrackBank.canScrollForwards());
 
         for (int i = 0; i < 8; i++) {
             setUpChannelControl(i, mixerTrackBank.getItemAt(i));

@@ -215,8 +215,6 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mTrackBank = host.createTrackBank(8, 5, 5, false);
       mTrackBank.setSkipDisabledItems(true);
       mTrackBank.setShouldShowClipLauncherFeedback(true);
-//      mTrackBank.setContentFilter(TrackBankContentFilter.ALL_VISIBLE_CHANNELS);
-//      mTrackBank.setSupportsDeviceChainChannels(true);
 
       mSceneBank = mTrackBank.sceneBank();
       mSceneBank.setIndication(true);
@@ -404,9 +402,6 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private void createShiftLayer()
    {
-//      mShiftLayer.bindPressed(mPlayButton, mTransport.continuePlaybackAction());
-//      mShiftLayer.bindToggle(mRecordButton, mTransport.isArrangerRecordEnabled());
-//      mShiftLayer.bindToggle(mSessionButton, mTransport.isArrangerAutomationWriteEnabled());
 
       for (int i = 0; i < 8; ++i)
       {
@@ -534,9 +529,6 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mRootTrackGroup.isStopped().markInterested();
       mMainLayer.bindInverted(mRootTrackGroup.isStopped(), mMasterTrackStopLed);
 
-//      mMainLayer.bindToggle(mPlayButton, mTransport.isPlaying());
-//      mMainLayer.bindToggle(mRecordButton, mTransport.isClipLauncherOverdubEnabled());
-//      mMainLayer.bindToggle(mSessionButton, mTransport.isClipLauncherAutomationWriteEnabled());
       mMainLayer.bindToggle(mMetronomeButton, mTransport.isMetronomeEnabled());
       mMainLayer.bindPressed(mTapTempoButton, mTransport.tapTempoAction());
 
@@ -564,14 +556,6 @@ class APC40MKIIControllerExtension extends ControllerExtension
       mMainLayer.bindToggle(mDeviceOnOffButton, mDeviceCursor.isEnabled());
       mMainLayer.bind(mDeviceCursor.isEnabled(), mDeviceOnOffLed);
 
-//      mMainLayer.bindToggle(mDeviceLockButton, mDeviceCursor.isPinned());
-//      mMainLayer.bind(mDeviceCursor.isPinned(), mDeviceLockLed);
-
-//      mMainLayer.bindPressed(mClipDeviceViewButton,
-//         getHost().createAction(() -> mApplication.nextSubPanel(), () -> "Next Sub Panel"));
-//      mMainLayer.bind(() -> true, mClipDeviceViewLed);
-
-//      mMainLayer.bindToggle(mDetailViewButton, mDeviceCursor.isWindowOpen());
       mMainLayer.bind(mDeviceCursor.isWindowOpen(), mDetailViewLed);
 
       mMainLayer.bindPressed(mLauncherUpButton, () -> {
@@ -640,7 +624,6 @@ class APC40MKIIControllerExtension extends ControllerExtension
          mMainLayer.bindLightState(() -> computeRGBLedStateForScene(sceneButtonIndex), rgbLed.getLight());
       }
 
-//      mMainLayer.activate();
    }
 
    protected void createHardwareControls()

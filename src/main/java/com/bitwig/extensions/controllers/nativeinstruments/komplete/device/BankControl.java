@@ -11,38 +11,38 @@ import com.bitwig.extensions.framework.values.BooleanValueObject;
 import com.bitwig.extensions.framework.values.ValueObject;
 
 public class BankControl {
-
+    
     private final MidiProcessor midiProcessor;
     private final List<DeviceSlot> devices = new ArrayList<>();
-
+    
     private final DeviceControl deviceControl;
     private final PinnableCursorDevice cursorDevice;
     private boolean nested;
     private int currentDeviceIndex = 0;
     private final ParentTab parentNavTab;
-
+    
     private final DeviceSlot trackDevice;
     private final DeviceSlot projectDevice;
-
+    
     private boolean usesTrackRemotes = false;
     private final ValueObject<Focus> currentFocus = new ValueObject<>(Focus.DEVICE);
     private boolean trackRemotesPresent;
     private boolean projectRemotesPresent;
     private final BooleanValueObject shiftHeld;
-
+    
     private static class ParentTab implements DeviceSelectionTab {
         @Override
         public String getLayerCode() {
             return "[<< Parent]";
         }
     }
-
+    
     public enum Focus {
         PROJECT,
         TRACK,
         DEVICE
     }
-
+    
     public BankControl(final PinnableCursorDevice cursorDevice, final MidiProcessor midiProcessor,
         final DeviceControl deviceControl, final BooleanValueObject shiftHeld) {
         final DeviceBank deviceBank = cursorDevice.deviceChain().createDeviceBank(64);
@@ -67,7 +67,7 @@ public class BankControl {
         cursorDevice.exists().markInterested();
         cursorDevice.isNested().addValueObserver(this::handleNested);
     }
-
+    
     protected void setTrackRemotesPresent(final boolean present) {
         this.trackRemotesPresent = present;
         if (usesTrackRemotes) {
@@ -81,7 +81,7 @@ public class BankControl {
             }
         }
     }
-
+    
     protected void setProjectRemotesPresent(final boolean present) {
         this.projectRemotesPresent = present;
         if (usesTrackRemotes) {
@@ -95,16 +95,16 @@ public class BankControl {
             }
         }
     }
-
+    
     public ValueObject<Focus> getCurrentFocus() {
         return currentFocus;
     }
-
+    
     private void handleNested(final boolean nested) {
         this.nested = nested;
         deviceControl.triggerUpdateAction();
     }
-
+    
     public void setUsesTrackRemotes(final boolean usesTrackRemotes) {
         this.usesTrackRemotes = usesTrackRemotes;
         if (!usesTrackRemotes) {
@@ -112,7 +112,7 @@ public class BankControl {
         }
         deviceControl.triggerUpdateAction();
     }
-
+    
     public int getSelectionIndex() {
         return switch (currentFocus.get()) {
             case DEVICE -> currentDeviceIndex + getIndexOffset();
@@ -120,10 +120,10 @@ public class BankControl {
             case PROJECT -> 0;
         };
     }
-
+    
     public List<? extends DeviceSelectionTab> getBankConfig() {
         final List<DeviceSelectionTab> elements = new ArrayList<>();
-
+        
         if (nested) {
             elements.add(parentNavTab);
         } else if (usesTrackRemotes) {
@@ -137,40 +137,40 @@ public class BankControl {
         devices.stream().filter(DeviceSlot::isExists).forEach(elements::add);
         return elements;
     }
-
+    
     private void handleHasDrumPads(final DeviceSlot slot, final boolean hasPads) {
         slot.setHasDrumPads(hasPads);
         deviceControl.triggerUpdateAction();
     }
-
-
+    
+    
     private void handleEnabled(final DeviceSlot slot, final boolean enabled) {
         slot.setEnabled(enabled);
         deviceControl.triggerUpdateAction();
     }
-
+    
     private void handleHasLayers(final DeviceSlot slot, final boolean hasLayers) {
         slot.setHasLayers(hasLayers);
         deviceControl.triggerUpdateAction();
     }
-
+    
     private void handleNameChange(final DeviceSlot slot, final String name) {
         slot.setName(name);
         deviceControl.triggerUpdateAction();
     }
-
+    
     private void handleExistChange(final DeviceSlot slot, final boolean exists) {
         slot.setExists(exists);
         deviceControl.triggerUpdateAction();
     }
-
+    
     private void handleCursorDevicePosition(final int position) {
         if (position < 0 || position > 64) {
             return;
         }
         currentDeviceIndex = position;
         final DeviceSlot slot = devices.get(position);
-
+        
         if (currentFocus.get() == Focus.DEVICE) {
             final int index = slot.getIndex() + getIndexOffset();
             midiProcessor.sendSelectionIndex(index, new int[0]);
@@ -181,7 +181,7 @@ public class BankControl {
             midiProcessor.sendSelectionIndex(0, new int[0]);
         }
     }
-
+    
     private int getIndexOffset() {
         if (nested) {
             return 1;
@@ -191,7 +191,7 @@ public class BankControl {
         }
         return 0;
     }
-
+    
     public void select(final int... selectionPath) {
         if (selectionPath.length == 0) {
             return;
@@ -223,8 +223,8 @@ public class BankControl {
         }
         currentFocus.set(Focus.DEVICE);
         final DeviceSlot slot = devices.get(index);
-
-
+        
+        
         if (selectionPath.length == 1) {
             if (shiftHeld.get()) {
                 slot.toggleEnabled();

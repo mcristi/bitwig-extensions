@@ -32,6 +32,6 @@ java {
     sourceCompatibility = JavaVersion.VERSION_21
 
     jar {
-        archiveFileName = 'BitwigControllers.bwextension'
+        archiveFileName = 'bitwig-extensions-by-meli.bwextension'
     }
 }
