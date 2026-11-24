@@ -5,6 +5,7 @@ import com.bitwig.extension.controller.api.Parameter;
 import com.bitwig.extension.controller.api.RelativeHardwareControlBinding;
 import com.bitwig.extension.controller.api.RelativeHardwareKnob;
 import com.bitwig.extension.controller.api.SettableRangedValue;
+import com.bitwig.extensions.CommonState;
 import com.bitwig.extensions.controllers.nativeinstruments.komplete.midi.MidiProcessor;
 import com.bitwig.extensions.framework.Binding;
 
@@ -23,6 +24,7 @@ public class KnobParameterBinding extends Binding<RelativeHardwareKnob, Settable
     private double sensitivity = BASE_SENSITIVITY;
     
     private HardwareBinding hwBinding;
+    private boolean touchedForMapping;
     private final MidiProcessor midiProcessor;
     
     public KnobParameterBinding(final int index, final RelativeHardwareKnob encoder, final Parameter parameter,
@@ -36,6 +38,29 @@ public class KnobParameterBinding extends Binding<RelativeHardwareKnob, Settable
         parameter.discreteValueCount().addValueObserver(this::updateDiscreteSteps);
         parameter.getOrigin().addValueObserver(this::updateOriginValue);
         parameter.value().addValueObserver(128, this::updateValue);
+        encoder.isUpdatingTargetValue().addValueObserver(updating -> {
+            if (updating) {
+                touchForMapping();
+            }
+        });
+    }
+
+    /**
+     * Bitwig's mapping mode takes the parameter that is touched, and a remote control that is merely
+     * set from a knob does not count. So while another controller of this extension waits for a
+     * parameter to map (see CommonState), turning the knob also touches its remote control.
+     */
+    private void touchForMapping() {
+        if (touchedForMapping || !isActive() || !CommonState.getInstance().isRemoteMappingWaiting()) {
+            return;
+        }
+        touchedForMapping = true;
+        final Parameter parameter = (Parameter) getTarget();
+        parameter.touch(true);
+        midiProcessor.delay(() -> {
+            parameter.touch(false);
+            touchedForMapping = false;
+        }, 200);
     }
     
     public void setOnPlugin(final boolean onPlugin) {
@@ -45,6 +70,9 @@ public class KnobParameterBinding extends Binding<RelativeHardwareKnob, Settable
     
     private void updateValue(final int paramValue) {
         this.paramValue = paramValue;
+        if (getSource().isUpdatingTargetValue().get()) {
+            touchForMapping(); // the change comes from the knob
+        }
         if (isActive()) {
             midiProcessor.updateParameterValue(index, paramValue);
         }

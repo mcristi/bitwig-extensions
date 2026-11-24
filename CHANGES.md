@@ -24,6 +24,13 @@ PAN / SEND / USER act only while held (double press no longer latches them).
 - `USER + CLIP` - delete clip
 - `BANK + CLIP` - cycle clip color
 
+#### Mapping mode for the project remote controls (USER knobs)
+- While `USER` is held the track select LEDs are off
+- `USER + SELECT 1-8` - mapping mode for the project remote control on that top knob: the knob's LED ring and that select button flash together and the next parameter touched in Bitwig (by mouse, from another controller, or with a device control knob of the APC40) is mapped to it. The ring then shows its value
+- Turning a device control knob of the APC40, or a parameter knob of the Kontrol S Mk3 (device / track / project remotes), counts as touching for Bitwig devices too: while a mapping waits, those knobs touch the remote control they turn (a plug-in reports touches itself, a Bitwig device's remote control set from a controller does not)
+- If that control is mapped already, a new page of project remote controls is created, the knobs switch to it and the control is mapped there (Bitwig does not let a script delete or overwrite a mapping; the old page stays and can be removed in Bitwig)
+- The mapping mode only lasts while `USER` is held: keep it held until the parameter is touched. Releasing `USER` cancels, as do `USER` + the same select button, `PAN` / `SENDS`, and changing the project remotes page (`USER + SCENE`). `USER` + another select button moves the mapping mode to that knob
+
 #### Device control buttons + LEDs changes
 - `BUTTON 6` - pin both track and device
 - `LED 6` - both track and device are pinned

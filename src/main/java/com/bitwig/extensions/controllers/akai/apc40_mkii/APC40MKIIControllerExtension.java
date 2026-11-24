@@ -1317,7 +1317,12 @@ class APC40MKIIControllerExtension extends ControllerExtension
          .setActionMatcher(mMidiIn.createNoteOffActionMatcher(0, BT_LAUNCHER_RIGHT));
    }
 
-   private void updateTopControlRing(final int knobIndex)
+   /** Lets a subclass change what a top knob's LED ring shows while the knobs are on the project remote controls. */
+   protected void overrideTopKnobLed(final int knobIndex, final KnobLed knobLed)
+   {
+   }
+
+   protected void updateTopControlRing(final int knobIndex)
    {
       final KnobLed knobLed = mTopControlKnobLeds[knobIndex];
       final AbsoluteHardwareKnob knob = mTopControlKnobs[knobIndex];
@@ -1335,6 +1340,9 @@ class APC40MKIIControllerExtension extends ControllerExtension
       default -> throw new IllegalStateException();
       };
       knobLed.setRing(knob.hasTargetValue().get() ? ring : KnobLed.RING_OFF);
+
+      if (mTopMode == TopMode.PROJECT_CONTROLS)
+         overrideTopKnobLed(knobIndex, knobLed);
 
       if (knobLed.wantsFlush())
          getHost().requestFlush();
@@ -1659,7 +1667,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private HardwareButton[] mABButtons;
 
-   private HardwareButton[] mTrackSelectButtons;
+   protected HardwareButton[] mTrackSelectButtons;
 
    private HardwareButton mMasterTrackSelectButton;
 
@@ -1709,9 +1717,9 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    protected HardwareButton mPanButton;
 
-   private HardwareButton mSendsButton;
+   protected HardwareButton mSendsButton;
 
-   private HardwareButton mUserButton;
+   protected HardwareButton mUserButton;
 
    private OnOffHardwareLight mPanLed;
 
@@ -1749,7 +1757,7 @@ class APC40MKIIControllerExtension extends ControllerExtension
 
    private MultiStateHardwareLight[] mABLeds;
 
-   private OnOffHardwareLight[] mTrackSelectLeds;
+   protected OnOffHardwareLight[] mTrackSelectLeds;
 
    private OnOffHardwareLight mMasterTrackSelectLed;
 
