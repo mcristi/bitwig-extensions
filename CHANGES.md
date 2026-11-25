@@ -98,8 +98,8 @@ the same ports as Bitwig's script: choose `bitwig-extensions-by-meli` in the dro
 The unit runs its factory map (MIDI channel 15, latching layers off).
 
 - Pin `K3 FX Track` and `K3 FX Device` on the Chain in the controller's panel
-- The controls follow the Chain's remote control pages by page name (upper / lower case does not matter).
-  A page that is missing leaves its controls without function
+- The controls follow the Chain's remote control pages by page name, which must match exactly (upper and
+  lower case too). A page that is missing leaves its controls without function
 
 #### Pages
 - `encoders` - controls 1-4 on the top encoders
@@ -114,6 +114,13 @@ The unit runs its factory map (MIDI channel 15, latching layers off).
 - `shaperbox` - controls 1-8 on the second and third row of the button matrix. Only one is on at a time:
   switching one on switches the others off
 
+#### Faders
+- `1` - mix of the device named `Guitar Rig` inside the Chain (control 2 of its remote controls)
+- `2` - mix of `Shaperbox`
+- `3` - not used
+- `4` - mix of `Pitch Grain`
+- The devices are found by name, exactly; a missing device leaves its fader without function
+
 #### Encoders
 - Turning an encoder on an automated parameter overrides the automation: its LED goes from dim to bright
   (yellow on encoders 1 and 2, orange on 3, light blue on 4)
@@ -124,11 +131,9 @@ The unit runs its factory map (MIDI channel 15, latching layers off).
 - On/off: bright when on, dim when off, dark when the page has no control there
 - Knobs pick the value up before they change it
 
-#### LAYER button
-- Restore all automation (bright orange while any automation is overridden, dim otherwise)
-
 #### Last row of the button matrix
-- `1` - unmute all pads of the Drum Machine, the first device next to the Chain (bright red while a pad
+- `1` - restore all automation (bright orange while any automation is overridden, dim otherwise)
+- `2` - unmute all pads of the Drum Machine, the first device next to the Chain (bright red while a pad
   is muted, dim otherwise)
-- `2`, `3` - not used
+- `3` - not used
 - `4` - fill, while held

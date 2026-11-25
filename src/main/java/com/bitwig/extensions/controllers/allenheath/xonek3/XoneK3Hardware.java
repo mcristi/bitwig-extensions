@@ -22,6 +22,8 @@ public final class XoneK3Hardware
     private static final int TOP_ENCODER_CC = 0x00;
     private static final int TOP_ENCODER_NOTE = 0x34;
     private static final int TOP_ENCODER_LED = 0x1E;
+    // 4 faders, left to right
+    private static final int FADER_CC = 0x10;
     // 3 rows of 4 pots, top row first
     private static final int KNOB_CC = 0x04;
     // the buttons below the pots, top row first; their LEDs are 0-11
@@ -30,9 +32,6 @@ public final class XoneK3Hardware
     private static final int[] GRID_NOTE = {
         0x24, 0x25, 0x26, 0x27, 0x20, 0x21, 0x22, 0x23, 0x1C, 0x1D, 0x1E, 0x1F, 0x18, 0x19, 0x1A, 0x1B};
     private static final int GRID_LED = 0x0C;
-    // the LAYER button, bottom left
-    private static final int LAYER_NOTE = 0x0C;
-    private static final int LAYER_LED = 0x1C;
     // the SHIFT button, bottom right
     private static final int SHIFT_NOTE = 0x0F;
     private static final int SHIFT_LED = 0x1D;
@@ -44,10 +43,10 @@ public final class XoneK3Hardware
     public final RelativeHardwareKnob[] topEncoders = new RelativeHardwareKnob[4];
     public final HardwareButton[] topEncoderButtons = new HardwareButton[4];
     public final AbsoluteHardwareKnob[] knobs = new AbsoluteHardwareKnob[12];
+    public final AbsoluteHardwareKnob[] faders = new AbsoluteHardwareKnob[4];
     public final HardwareButton[] knobButtons = new HardwareButton[12];
     public final HardwareButton[] gridButtons = new HardwareButton[16];
     public final HardwareButton shiftButton;
-    public final HardwareButton layerButton;
 
     private final HardwareSurface surface;
     private final MidiIn midiIn;
@@ -56,7 +55,6 @@ public final class XoneK3Hardware
     private final MultiStateHardwareLight[] knobButtonLights = new MultiStateHardwareLight[12];
     private final MultiStateHardwareLight[] gridLights = new MultiStateHardwareLight[16];
     private final MultiStateHardwareLight shiftLight;
-    private final MultiStateHardwareLight layerLight;
 
     public XoneK3Hardware(final HardwareSurface surface, final MidiIn midiIn, final MidiOut midiOut)
     {
@@ -69,6 +67,11 @@ public final class XoneK3Hardware
             topEncoders[i] = createEncoder("ENCODER " + (i + 1), TOP_ENCODER_CC + i);
             topEncoderButtons[i] = createButton("ENCODER PUSH " + (i + 1), TOP_ENCODER_NOTE + i);
             topEncoderLights[i] = createLight("ENCODER LED " + (i + 1), TOP_ENCODER_LED + i, topEncoderButtons[i]);
+        }
+        for (int i = 0; i < 4; i++)
+        {
+            faders[i] = surface.createAbsoluteHardwareKnob("FADER " + (i + 1));
+            faders[i].setAdjustValueMatcher(midiIn.createAbsoluteCCValueMatcher(CHANNEL, FADER_CC + i));
         }
         for (int i = 0; i < 12; i++)
         {
@@ -86,13 +89,6 @@ public final class XoneK3Hardware
         }
         shiftButton = createButton("SHIFT", SHIFT_NOTE);
         shiftLight = createLight("SHIFT LED", SHIFT_LED, shiftButton);
-        layerButton = createButton("LAYER", LAYER_NOTE);
-        layerLight = createLight("LAYER LED", LAYER_LED, layerButton);
-    }
-
-    public void setLayerLight(final Supplier<XoneColor> color)
-    {
-        layerLight.state().setValueSupplier(color::get);
     }
 
     public void setShiftLight(final Supplier<XoneColor> color)

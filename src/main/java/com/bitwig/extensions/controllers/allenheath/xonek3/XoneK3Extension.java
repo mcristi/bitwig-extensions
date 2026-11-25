@@ -13,6 +13,8 @@ import com.bitwig.extension.controller.api.ControllerHost;
 import com.bitwig.extension.controller.api.CursorDeviceFollowMode;
 import com.bitwig.extension.controller.api.CursorRemoteControlsPage;
 import com.bitwig.extension.controller.api.CursorTrack;
+import com.bitwig.extension.controller.api.Device;
+import com.bitwig.extension.controller.api.DeviceBank;
 import com.bitwig.extension.controller.api.DrumPadBank;
 import com.bitwig.extension.controller.api.HardwareButton;
 import com.bitwig.extension.controller.api.HardwareSurface;
@@ -32,14 +34,19 @@ import com.bitwig.extension.controller.api.Transport;
  * <li>"looper": controls 1-4 on the first row of the button matrix</li>
  * <li>"shaperbox": controls 1-8 on the second and third row of the button matrix</li>
  * </ul>
- * LAYER restores all automation, SHIFT moves the first row of knobs to "eq shift".
- * The last matrix row holds: unmute all drum pads, two free buttons and fill (while held). A page that the device does not have leaves its controls without function.
+ * LAYER is kept free, SHIFT moves the first row of knobs to "eq shift".
+ * The last matrix row holds: restore automation, unmute all drum pads, a free button and fill (while held).
+ * The faders 1, 2 and 4 control the mix (control 2) of the devices "Guitar Rig", "Shaperbox" and
+ * "Pitch Grain" inside the Chain. Page and device names must match exactly, upper and lower case too.
+ * A page or device that is missing leaves its controls without function.
  */
 public class XoneK3Extension extends ControllerExtension
 {
     private static final int PAGE_SIZE = 8;
     // turns closer together than this belong to one movement of an encoder
     private static final int TURN_GAP_MS = 300;
+    // how many devices inside the pinned Chain are searched for the ones with a fader
+    private static final int INNER_DEVICES = 16;
     // all pads of the Drum Machine, so muted pads are seen wherever they are
     private static final int DRUM_PADS = 128;
 
@@ -142,6 +149,13 @@ public class XoneK3Extension extends ControllerExtension
                 color -> hardware.setGridLight(index, color));
         }
 
+        // the wet/dry mix of the effects that sit in chains of their own inside the pinned Chain:
+        // control 2 of their remote controls page, on faders 1, 2 and 4
+        final DeviceBank innerDevices = cursorDevice.getCursorSlot().createDeviceBank(INNER_DEVICES);
+        new InnerDeviceControl(innerDevices, "Guitar Rig", 1, hardware.faders[0]);
+        new InnerDeviceControl(innerDevices, "Shaperbox", 1, hardware.faders[1]);
+        new InnerDeviceControl(innerDevices, "Pitch Grain", 1, hardware.faders[3]);
+
         initFunctionRow();
         hardware.init();
     }
@@ -149,14 +163,14 @@ public class XoneK3Extension extends ControllerExtension
     /** The last row of the button matrix. */
     private void initFunctionRow()
     {
-        // bright while there is something to reset, dim otherwise; the two middle buttons are free
-        hardware.layerButton.pressedAction().setBinding(
-            host.createAction(this::restoreAutomation, () -> "Restore automation"));
-        hardware.setLayerLight(() -> automationOverrideActive ? XoneColor.ORANGE : XoneColor.ORANGE.dim());
-
+        // bright while there is something to reset, dim otherwise; the third button is free
         hardware.gridButtons[12].pressedAction().setBinding(
+            host.createAction(this::restoreAutomation, () -> "Restore automation"));
+        hardware.setGridLight(12, () -> automationOverrideActive ? XoneColor.ORANGE : XoneColor.ORANGE.dim());
+
+        hardware.gridButtons[13].pressedAction().setBinding(
             host.createAction(drumPads::clearMutedPads, () -> "Unmute pads"));
-        hardware.setGridLight(12, () -> drumPads.hasMutedPads().get() ? XoneColor.RED : XoneColor.RED.dim());
+        hardware.setGridLight(13, () -> drumPads.hasMutedPads().get() ? XoneColor.RED : XoneColor.RED.dim());
 
         final HardwareButton fill = hardware.gridButtons[15];
         fill.pressedAction().setBinding(host.createAction(() -> transport.isFillModeActive().set(true), () -> "Fill on"));
@@ -210,6 +224,69 @@ public class XoneK3Extension extends ControllerExtension
         // the value the encoder set last and when, see RemotePage.turn
         private double target;
         private long lastTurn;
+    }
+
+    /**
+     * A fader on one control of a device inside the pinned Chain, found by the device's name. It follows
+     * the device if it moves, and does nothing while no device has that name.
+     */
+    private final class InnerDeviceControl
+    {
+        private final String deviceName;
+        private final AbsoluteHardwareKnob fader;
+        private final RemoteControl[] controls = new RemoteControl[INNER_DEVICES];
+        private final String[] names = new String[INNER_DEVICES];
+        private final boolean[] exists = new boolean[INNER_DEVICES];
+        private int boundIndex = -1;
+
+        InnerDeviceControl(final DeviceBank devices, final String deviceName, final int slot,
+            final AbsoluteHardwareKnob fader)
+        {
+            this.deviceName = deviceName;
+            this.fader = fader;
+            for (int i = 0; i < INNER_DEVICES; i++)
+            {
+                final int index = i;
+                final Device device = devices.getItemAt(i);
+                // named: Bitwig allows only one unnamed ("main") remote controls page per extension
+                controls[i] = device.createCursorRemoteControlsPage("K3 " + deviceName + " " + i, PAGE_SIZE, null)
+                    .getParameter(slot);
+                device.name().addValueObserver(name -> {
+                    names[index] = name;
+                    update();
+                });
+                device.exists().addValueObserver(present -> {
+                    exists[index] = present;
+                    update();
+                });
+            }
+        }
+
+        private void update()
+        {
+            int found = -1;
+            for (int i = 0; i < INNER_DEVICES; i++)
+            {
+                if (exists[i] && names[i] != null && names[i].trim().equals(deviceName))
+                {
+                    found = i;
+                    break;
+                }
+            }
+            if (found == boundIndex)
+            {
+                return;
+            }
+            boundIndex = found;
+            if (found < 0)
+            {
+                fader.clearBindings();
+            }
+            else
+            {
+                fader.setBinding(controls[found]);
+            }
+        }
     }
 
     /** A knob or encoder of a page: how it is tied to its parameter and released, and when it may be. */
@@ -267,7 +344,7 @@ public class XoneK3Extension extends ControllerExtension
             int wanted = -1;
             for (int i = 0; i < pageNames.length; i++)
             {
-                if (pageNames[i].trim().equalsIgnoreCase(pageName))
+                if (pageNames[i].trim().equals(pageName))
                 {
                     wanted = i;
                     break;
