@@ -4,3 +4,5 @@ com.bitwig.extensions.controllers.nativeinstruments.komplete.definition.KontrolS
 com.bitwig.extensions.controllers.nativeinstruments.komplete.definition.NksConnectExtensionDefinition
 
 com.bitwig.extensions.controllers.paintaudio.midicaptain.PaintAudioMidiCaptainExtensionDefinition
+
+com.bitwig.extensions.controllers.allenheath.xonek3.XoneK3ExtensionDefinition

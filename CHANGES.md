@@ -91,3 +91,44 @@ Same in both modes:
 - `EXP 1` - the selected track's volume / pan or the selected device's remote 1 / 2, per expression mode
 - `EXP 2` - the counterpart: Pan when `EXP 1` is Volume (and vice versa), Device Param 2 when `EXP 1` is Device Param 1 (and vice versa)
 - `ENCODER` - tempo, 53-180 BPM in whole steps
+
+## Allen & Heath Xone:K3 (not upstream's script)
+A new extension by mcristi (not Bitwig's own Xone:K3 script) that controls one FX Chain. It is detected on
+the same ports as Bitwig's script: choose `bitwig-extensions-by-meli` in the drop-down of the Xone:K3 controller.
+The unit runs its factory map (MIDI channel 15, latching layers off).
+
+- Pin `K3 FX Track` and `K3 FX Device` on the Chain in the controller's panel
+- The controls follow the Chain's remote control pages by page name (upper / lower case does not matter).
+  A page that is missing leaves its controls without function
+
+#### Pages
+- `encoders` - controls 1-4 on the top encoders
+- `eq` - controls 1-4 on the first row of knobs, controls 5-7 (low, mid, high band on/off) on the first
+  three buttons below them, in red, yellow and blue
+- `eq shift` - controls 1-4 on the first row of knobs while `SHIFT` is held (low frequency on 1, high
+  frequency on 3). The low and high band buttons keep working, the mid band button is off meanwhile
+- `guitar rig` - controls 1-4 on the last row of knobs, controls 5-8 on the buttons below them
+  (orange, light blue for the delay freeze, orange, and green with a reversed light for the last one:
+  bright while its parameter is off, dim while it is on)
+- `looper` - controls 1-4 on the first row of the button matrix. Only one is on at a time
+- `shaperbox` - controls 1-8 on the second and third row of the button matrix. Only one is on at a time:
+  switching one on switches the others off
+
+#### Encoders
+- Turning an encoder on an automated parameter overrides the automation: its LED goes from dim to bright
+  (yellow on encoders 1 and 2, orange on 3, light blue on 4)
+- Pushing the encoder restores the automation of that parameter and dims the LED. Turning it again
+  starts from the value the automation has at that moment
+
+#### Buttons
+- On/off: bright when on, dim when off, dark when the page has no control there
+- Knobs pick the value up before they change it
+
+#### LAYER button
+- Restore all automation (bright orange while any automation is overridden, dim otherwise)
+
+#### Last row of the button matrix
+- `1` - unmute all pads of the Drum Machine, the first device next to the Chain (bright red while a pad
+  is muted, dim otherwise)
+- `2`, `3` - not used
+- `4` - fill, while held

@@ -60,25 +60,7 @@
                 null,
                 null,
                 null,
-                {
-                    "color": "Turquoise",
-                    "custom_label": true,
-                    "label": "RST macros",
-                    "mapping": {
-                        "assignment": {
-                            "cc": {
-                                "midi_cc_number": 119,
-                                "midi_channel": 0
-                            }
-                        },
-                        "behaviour": {
-                            "toggle": {
-                                "off": 0,
-                                "on": 127
-                            }
-                        }
-                    }
-                }
+                null
             ],
             "knobs": [
                 {
