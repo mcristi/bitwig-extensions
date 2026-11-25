@@ -29,14 +29,15 @@ import com.bitwig.extension.controller.api.Transport;
  * <li>"eq": high, mid, low (controls 1-3, on/off 5-7) down the first column of knobs</li>
  * <li>"eq shift": controls 3, 2, 1 on the same knobs while SHIFT is held (low frequency in control 1)</li>
  * <li>"guitar rig": controls 1-2 down column 3, 3-4 down column 4 (second and third row of knobs),
- * 6 and 8 on the buttons of the third row</li>
+ * 5-8 on the buttons below them</li>
+ * <li>"global": control 1 (FX on/off) on the third button of the last matrix row</li>
  * <li>"looper": controls 1-4 on the first row of the button matrix</li>
  * <li>"shaperbox": controls 1-8 on the second and third row of the button matrix</li>
  * <li>"mix": controls 1-4 on faders 1-4 (the Mix knobs of the Chain, Shaperbox, Pitch Grain and
  * Guitar Rig)</li>
  * </ul>
  * LAYER is kept free, SHIFT moves the first row of knobs to "eq shift".
- * The last matrix row holds: restore automation, unmute all drum pads, a free button and fill (while held).
+ * The last matrix row holds: restore automation, unmute all drum pads, FX on/off ("global") and fill (while held).
  * Page names must match exactly, upper and lower case too. A page that is missing leaves its controls
  * without function.
  */
@@ -120,19 +121,25 @@ public class XoneK3Extension extends ControllerExtension
         hardware.shiftButton.releasedAction().setBinding(host.createAction(() -> setShift(false), () -> "Shift off"));
         hardware.setShiftLight(() -> shiftHeld ? XoneColor.WHITE : XoneColor.WHITE.dim());
 
-        // The "guitar rig" page in the second and third row of knobs, columns 3 and 4: reverb (1) and
-        // delay (2) down column 3, controls 3 and 4 down column 4. The delay freeze (6) is below the delay,
-        // the FX on/off (8) below control 4; its light is reversed: bright green while the effect is in.
+        // The "guitar rig" page in the second and third row of knobs, columns 3 and 4: reverb (1) over
+        // delay (2) in column 3, gater (3) over drive (4) in column 4. The button below each knob is the
+        // control 4 places further (5-8), e.g. the delay freeze (6) below the delay.
         final RemotePage guitarRigPage = new RemotePage(cursorDevice, "guitar rig");
         final int[] guitarRigKnobs = {6, 10, 7, 11};
+        final XoneColor[] guitarRigColors = {XoneColor.PURPLE, XoneColor.LIGHT_BLUE, XoneColor.YELLOW,
+            XoneColor.ORANGE};
         for (int i = 0; i < 4; i++)
         {
-            guitarRigPage.bindKnob(hardware.knobs[guitarRigKnobs[i]], i, () -> true);
+            final int index = guitarRigKnobs[i];
+            guitarRigPage.bindKnob(hardware.knobs[index], i, () -> true);
+            guitarRigPage.bindToggle(hardware.knobButtons[index], 4 + i, guitarRigColors[i], () -> true,
+                color -> hardware.setKnobButtonLight(index, color));
         }
-        guitarRigPage.bindToggle(hardware.knobButtons[10], 5, 0, false, XoneColor.LIGHT_BLUE, () -> true,
-            color -> hardware.setKnobButtonLight(10, color));
-        guitarRigPage.bindToggle(hardware.knobButtons[11], 7, 0, true, XoneColor.GREEN, () -> true,
-            color -> hardware.setKnobButtonLight(11, color));
+
+        // The "global" page: the FX on/off (1) on the third button of the last matrix row. Its light is
+        // reversed: bright green while the parameter is off, i.e. while the effects are in.
+        new RemotePage(cursorDevice, "global").bindToggle(hardware.gridButtons[14], 0, 0, true, XoneColor.GREEN,
+            () -> true, color -> hardware.setGridLight(14, color));
 
         final RemotePage looperPage = new RemotePage(cursorDevice, "looper");
         for (int i = 0; i < 4; i++)
@@ -167,7 +174,7 @@ public class XoneK3Extension extends ControllerExtension
     /** The last row of the button matrix. */
     private void initFunctionRow()
     {
-        // bright while there is something to reset, dim otherwise; the third button is free
+        // bright while there is something to reset, dim otherwise; the third button is on the "global" page
         hardware.gridButtons[12].pressedAction().setBinding(
             host.createAction(this::restoreAutomation, () -> "Restore automation"));
         hardware.setGridLight(12, () -> automationOverrideActive ? XoneColor.ORANGE : XoneColor.ORANGE.dim());

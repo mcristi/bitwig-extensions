@@ -108,10 +108,11 @@ The unit runs its factory map (MIDI channel 15, latching layers off).
 - `eq shift` - while `SHIFT` is held, the same three knobs control the frequencies: control 3 (high
   frequency) on the high knob, 2 on the mid knob, 1 (low frequency) on the low knob. The high and low band buttons
   keep working, the mid band button is off meanwhile
-- `guitar rig` - the second and third row of knobs in columns 3 and 4: control 1 (reverb) and 2 (delay)
-  down column 3, 3 and 4 down column 4. Below the delay knob control 6 (delay freeze, light blue),
-  below control 4 control 8 (FX on/off, green with a reversed light: bright while its parameter is off,
-  dim while it is on)
+- `guitar rig` - the second and third row of knobs in columns 3 and 4: control 1 (reverb) over 2 (delay)
+  in column 3, 3 (gater) over 4 (drive) in column 4. The button below each knob is the control 4 places
+  further: 5 reverb (purple), 6 delay freeze (light blue), 7 gater (yellow), 8 drive (orange)
+- `global` - control 1 (FX on/off) on the third button of the last matrix row, green with a reversed
+  light: bright while its parameter is off, dim while it is on
 - `looper` - controls 1-4 on the first row of the button matrix. Only one is on at a time
 - `shaperbox` - controls 1-8 on the second and third row of the button matrix. Only one is on at a time:
   switching one on switches the others off
@@ -135,5 +136,5 @@ The unit runs its factory map (MIDI channel 15, latching layers off).
 - `1` - restore all automation (bright orange while any automation is overridden, dim otherwise)
 - `2` - unmute all pads of the Drum Machine, the first device next to the Chain (bright red while a pad
   is muted, dim otherwise)
-- `3` - not used
+- `3` - FX on/off, control 1 of the page `global`
 - `4` - fill, while held

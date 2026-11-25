@@ -18,6 +18,7 @@ public final class XoneColor extends InternalHardwareLightState
     public static final XoneColor GREEN = new XoneColor(0, 127, 0, BRIGHT);
     public static final XoneColor BLUE = new XoneColor(0, 20, 127, BRIGHT);
     public static final XoneColor LIGHT_BLUE = new XoneColor(20, 110, 127, BRIGHT);
+    public static final XoneColor PURPLE = new XoneColor(50, 0, 127, BRIGHT);
     public static final XoneColor MAGENTA = new XoneColor(127, 1, 127, BRIGHT);
     public static final XoneColor WHITE = new XoneColor(127, 127, 127, BRIGHT);
 
