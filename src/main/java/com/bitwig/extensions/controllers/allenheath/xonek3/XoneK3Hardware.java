@@ -72,6 +72,8 @@ public final class XoneK3Hardware
         {
             faders[i] = surface.createAbsoluteHardwareKnob("FADER " + (i + 1));
             faders[i].setAdjustValueMatcher(midiIn.createAbsoluteCCValueMatcher(CHANNEL, FADER_CC + i));
+            // no pickup: moving a fader sets its value at once
+            faders[i].disableTakeOver();
         }
         for (int i = 0; i < 12; i++)
         {

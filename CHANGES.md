@@ -103,23 +103,26 @@ The unit runs its factory map (MIDI channel 15, latching layers off).
 
 #### Pages
 - `encoders` - controls 1-4 on the top encoders
-- `eq` - controls 1-4 on the first row of knobs, controls 5-7 (low, mid, high band on/off) on the first
-  three buttons below them, in red, yellow and blue
-- `eq shift` - controls 1-4 on the first row of knobs while `SHIFT` is held (low frequency on 1, high
-  frequency on 3). The low and high band buttons keep working, the mid band button is off meanwhile
-- `guitar rig` - controls 1-4 on the last row of knobs, controls 5-8 on the buttons below them
-  (orange, light blue for the delay freeze, orange, and green with a reversed light for the last one:
-  bright while its parameter is off, dim while it is on)
+- `eq` - the high, mid and low band down the first column of knobs, high on top: gains are controls
+  1-3, band on/off controls 5-7 on the buttons below them, in blue, yellow and red
+- `eq shift` - while `SHIFT` is held, the same three knobs control the frequencies: control 3 (high
+  frequency) on the high knob, 2 on the mid knob, 1 (low frequency) on the low knob. The high and low band buttons
+  keep working, the mid band button is off meanwhile
+- `guitar rig` - the second and third row of knobs in columns 3 and 4: control 1 (reverb) and 2 (delay)
+  down column 3, 3 and 4 down column 4. Below the delay knob control 6 (delay freeze, light blue),
+  below control 4 control 8 (FX on/off, green with a reversed light: bright while its parameter is off,
+  dim while it is on)
 - `looper` - controls 1-4 on the first row of the button matrix. Only one is on at a time
 - `shaperbox` - controls 1-8 on the second and third row of the button matrix. Only one is on at a time:
   switching one on switches the others off
 
 #### Faders
-- `1` - mix of the device named `Guitar Rig` inside the Chain (control 2 of its remote controls)
-- `2` - mix of `Shaperbox`
-- `3` - not used
-- `4` - mix of `Pitch Grain`
+- `1` - control 2 of the page `mix`, meant for the Chain's own Mix knob (wet/dry of all effects)
+- `2` - mix of the device named `Shaperbox` inside the Chain (control 2 of its remote controls)
+- `3` - mix of `Pitch Grain`
+- `4` - mix of `Guitar Rig`
 - The devices are found by name, exactly; a missing device leaves its fader without function
+- No pickup: moving a fader sets the mix to the fader's position at once
 
 #### Encoders
 - Turning an encoder on an automated parameter overrides the automation: its LED goes from dim to bright

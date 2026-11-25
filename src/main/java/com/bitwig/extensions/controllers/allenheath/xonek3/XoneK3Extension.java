@@ -28,16 +28,18 @@ import com.bitwig.extension.controller.api.Transport;
  * Bitwig, and the controls are tied to the Chain's remote control pages by page name:
  * <ul>
  * <li>"encoders": controls 1-4 on the top encoders</li>
- * <li>"eq": controls 1-4 on the first row of knobs, 5-7 on the buttons below them</li>
- * <li>"eq shift": controls 1-4 on the first row of knobs while SHIFT is held</li>
- * <li>"guitar rig": controls 1-4 on the last row of knobs, 5-8 on the buttons below them</li>
+ * <li>"eq": high, mid, low (controls 1-3, on/off 5-7) down the first column of knobs</li>
+ * <li>"eq shift": controls 3, 2, 1 on the same knobs while SHIFT is held (low frequency in control 1)</li>
+ * <li>"guitar rig": controls 1-2 down column 3, 3-4 down column 4 (second and third row of knobs),
+ * 6 and 8 on the buttons of the third row</li>
  * <li>"looper": controls 1-4 on the first row of the button matrix</li>
  * <li>"shaperbox": controls 1-8 on the second and third row of the button matrix</li>
+ * <li>"mix": control 2 (the Chain's own Mix knob) on fader 1</li>
  * </ul>
  * LAYER is kept free, SHIFT moves the first row of knobs to "eq shift".
  * The last matrix row holds: restore automation, unmute all drum pads, a free button and fill (while held).
- * The faders 1, 2 and 4 control the mix (control 2) of the devices "Guitar Rig", "Shaperbox" and
- * "Pitch Grain" inside the Chain. Page and device names must match exactly, upper and lower case too.
+ * The faders 2, 3 and 4 control the mix (control 2) of the devices "Shaperbox", "Pitch Grain" and
+ * "Guitar Rig" inside the Chain. Page and device names must match exactly, upper and lower case too.
  * A page or device that is missing leaves its controls without function.
  */
 public class XoneK3Extension extends ControllerExtension
@@ -103,35 +105,38 @@ public class XoneK3Extension extends ControllerExtension
         // The first row of knobs: the "eq" page, and the "eq shift" page while SHIFT is held (the
         // frequencies of the low and high band on knobs 1 and 3). The low, mid and high band buttons
         // below stay on the "eq" page, but the mid one is off while SHIFT is held.
+        // The "eq" page holds the high, mid and low band: gains in controls 1-3, on/off in 5-7. They go
+        // down the first column of knobs, high on top, each band's button below its knob.
         final RemotePage eqPage = new RemotePage(cursorDevice, "eq");
         final RemotePage eqShiftPage = new RemotePage(cursorDevice, "eq shift");
-        final XoneColor[] bandColors = {XoneColor.RED, XoneColor.YELLOW, XoneColor.BLUE};
-        for (int i = 0; i < 4; i++)
+        final int[] bandKnobs = {0, 4, 8};
+        final XoneColor[] bandColors = {XoneColor.BLUE, XoneColor.YELLOW, XoneColor.RED};
+        for (int band = 0; band < 3; band++)
         {
-            eqPage.bindKnob(hardware.knobs[i], i, () -> !shiftHeld);
-            eqShiftPage.bindKnob(hardware.knobs[i], i, () -> shiftHeld);
-        }
-        for (int i = 0; i < 3; i++)
-        {
-            final int index = i;
-            eqPage.bindToggle(hardware.knobButtons[i], 4 + i, bandColors[i], i == 1 ? () -> !shiftHeld : () -> true,
-                color -> hardware.setKnobButtonLight(index, color));
+            final int index = bandKnobs[band];
+            eqPage.bindKnob(hardware.knobs[index], band, () -> !shiftHeld);
+            // "eq shift" runs the other way: low frequency in control 1, high frequency in control 3
+            eqShiftPage.bindKnob(hardware.knobs[index], 2 - band, () -> shiftHeld);
+            eqPage.bindToggle(hardware.knobButtons[index], 4 + band, bandColors[band],
+                band == 1 ? () -> !shiftHeld : () -> true, color -> hardware.setKnobButtonLight(index, color));
         }
         hardware.shiftButton.pressedAction().setBinding(host.createAction(() -> setShift(true), () -> "Shift"));
         hardware.shiftButton.releasedAction().setBinding(host.createAction(() -> setShift(false), () -> "Shift off"));
         hardware.setShiftLight(() -> shiftHeld ? XoneColor.WHITE : XoneColor.WHITE.dim());
 
+        // The "guitar rig" page in the second and third row of knobs, columns 3 and 4: reverb (1) and
+        // delay (2) down column 3, controls 3 and 4 down column 4. The delay freeze (6) is below the delay,
+        // the FX on/off (8) below control 4; its light is reversed: bright green while the effect is in.
         final RemotePage guitarRigPage = new RemotePage(cursorDevice, "guitar rig");
-        // the second button freezes the delay; the last one takes the effect out, so its light is
-        // reversed: bright green while the effect is in
-        final XoneColor[] guitarRigColors = {XoneColor.ORANGE, XoneColor.LIGHT_BLUE, XoneColor.ORANGE, XoneColor.GREEN};
+        final int[] guitarRigKnobs = {6, 10, 7, 11};
         for (int i = 0; i < 4; i++)
         {
-            final int index = 8 + i;
-            guitarRigPage.bindKnob(hardware.knobs[index], i, () -> true);
-            guitarRigPage.bindToggle(hardware.knobButtons[index], 4 + i, 0, i == 3, guitarRigColors[i], () -> true,
-                color -> hardware.setKnobButtonLight(index, color));
+            guitarRigPage.bindKnob(hardware.knobs[guitarRigKnobs[i]], i, () -> true);
         }
+        guitarRigPage.bindToggle(hardware.knobButtons[10], 5, 0, false, XoneColor.LIGHT_BLUE, () -> true,
+            color -> hardware.setKnobButtonLight(10, color));
+        guitarRigPage.bindToggle(hardware.knobButtons[11], 7, 0, true, XoneColor.GREEN, () -> true,
+            color -> hardware.setKnobButtonLight(11, color));
 
         final RemotePage looperPage = new RemotePage(cursorDevice, "looper");
         for (int i = 0; i < 4; i++)
@@ -150,11 +155,13 @@ public class XoneK3Extension extends ControllerExtension
         }
 
         // the wet/dry mix of the effects that sit in chains of their own inside the pinned Chain:
-        // control 2 of their remote controls page, on faders 1, 2 and 4
+        // control 2 of their remote controls page, on faders 2, 3 and 4
         final DeviceBank innerDevices = cursorDevice.getCursorSlot().createDeviceBank(INNER_DEVICES);
-        new InnerDeviceControl(innerDevices, "Guitar Rig", 1, hardware.faders[0]);
+        // The API cannot reach the Chain's own Mix knob directly, so it is mapped on a page of its own
+        new RemotePage(cursorDevice, "mix").bindKnob(hardware.faders[0], 1, () -> true);
         new InnerDeviceControl(innerDevices, "Shaperbox", 1, hardware.faders[1]);
-        new InnerDeviceControl(innerDevices, "Pitch Grain", 1, hardware.faders[3]);
+        new InnerDeviceControl(innerDevices, "Pitch Grain", 1, hardware.faders[2]);
+        new InnerDeviceControl(innerDevices, "Guitar Rig", 1, hardware.faders[3]);
 
         initFunctionRow();
         hardware.init();
