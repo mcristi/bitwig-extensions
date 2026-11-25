@@ -13,8 +13,6 @@ import com.bitwig.extension.controller.api.ControllerHost;
 import com.bitwig.extension.controller.api.CursorDeviceFollowMode;
 import com.bitwig.extension.controller.api.CursorRemoteControlsPage;
 import com.bitwig.extension.controller.api.CursorTrack;
-import com.bitwig.extension.controller.api.Device;
-import com.bitwig.extension.controller.api.DeviceBank;
 import com.bitwig.extension.controller.api.DrumPadBank;
 import com.bitwig.extension.controller.api.HardwareButton;
 import com.bitwig.extension.controller.api.HardwareSurface;
@@ -34,21 +32,19 @@ import com.bitwig.extension.controller.api.Transport;
  * 6 and 8 on the buttons of the third row</li>
  * <li>"looper": controls 1-4 on the first row of the button matrix</li>
  * <li>"shaperbox": controls 1-8 on the second and third row of the button matrix</li>
- * <li>"mix": control 2 (the Chain's own Mix knob) on fader 1</li>
+ * <li>"mix": controls 1-4 on faders 1-4 (the Mix knobs of the Chain, Shaperbox, Pitch Grain and
+ * Guitar Rig)</li>
  * </ul>
  * LAYER is kept free, SHIFT moves the first row of knobs to "eq shift".
  * The last matrix row holds: restore automation, unmute all drum pads, a free button and fill (while held).
- * The faders 2, 3 and 4 control the mix (control 2) of the devices "Shaperbox", "Pitch Grain" and
- * "Guitar Rig" inside the Chain. Page and device names must match exactly, upper and lower case too.
- * A page or device that is missing leaves its controls without function.
+ * Page names must match exactly, upper and lower case too. A page that is missing leaves its controls
+ * without function.
  */
 public class XoneK3Extension extends ControllerExtension
 {
     private static final int PAGE_SIZE = 8;
     // turns closer together than this belong to one movement of an encoder
     private static final int TURN_GAP_MS = 300;
-    // how many devices inside the pinned Chain are searched for the ones with a fader
-    private static final int INNER_DEVICES = 16;
     // all pads of the Drum Machine, so muted pads are seen wherever they are
     private static final int DRUM_PADS = 128;
 
@@ -154,14 +150,15 @@ public class XoneK3Extension extends ControllerExtension
                 color -> hardware.setGridLight(index, color));
         }
 
-        // the wet/dry mix of the effects that sit in chains of their own inside the pinned Chain:
-        // control 2 of their remote controls page, on faders 2, 3 and 4
-        final DeviceBank innerDevices = cursorDevice.getCursorSlot().createDeviceBank(INNER_DEVICES);
-        // The API cannot reach the Chain's own Mix knob directly, so it is mapped on a page of its own
-        new RemotePage(cursorDevice, "mix").bindKnob(hardware.faders[0], 1, () -> true);
-        new InnerDeviceControl(innerDevices, "Shaperbox", 1, hardware.faders[1]);
-        new InnerDeviceControl(innerDevices, "Pitch Grain", 1, hardware.faders[2]);
-        new InnerDeviceControl(innerDevices, "Guitar Rig", 1, hardware.faders[3]);
+        // The wet/dry mixes, all from one page of the pinned Chain: controls 1-4 on faders 1-4 (the
+        // Chain's own Mix knob, then the Mix knobs of the Shaperbox, Pitch Grain and Guitar Rig chains).
+        // The API reaches devices inside a Chain only while the Chain is open in Bitwig, so these knobs
+        // are mapped on the Chain's own page instead.
+        final RemotePage mixPage = new RemotePage(cursorDevice, "mix");
+        for (int i = 0; i < 4; i++)
+        {
+            mixPage.bindKnob(hardware.faders[i], i, () -> true);
+        }
 
         initFunctionRow();
         hardware.init();
@@ -231,69 +228,6 @@ public class XoneK3Extension extends ControllerExtension
         // the value the encoder set last and when, see RemotePage.turn
         private double target;
         private long lastTurn;
-    }
-
-    /**
-     * A fader on one control of a device inside the pinned Chain, found by the device's name. It follows
-     * the device if it moves, and does nothing while no device has that name.
-     */
-    private final class InnerDeviceControl
-    {
-        private final String deviceName;
-        private final AbsoluteHardwareKnob fader;
-        private final RemoteControl[] controls = new RemoteControl[INNER_DEVICES];
-        private final String[] names = new String[INNER_DEVICES];
-        private final boolean[] exists = new boolean[INNER_DEVICES];
-        private int boundIndex = -1;
-
-        InnerDeviceControl(final DeviceBank devices, final String deviceName, final int slot,
-            final AbsoluteHardwareKnob fader)
-        {
-            this.deviceName = deviceName;
-            this.fader = fader;
-            for (int i = 0; i < INNER_DEVICES; i++)
-            {
-                final int index = i;
-                final Device device = devices.getItemAt(i);
-                // named: Bitwig allows only one unnamed ("main") remote controls page per extension
-                controls[i] = device.createCursorRemoteControlsPage("K3 " + deviceName + " " + i, PAGE_SIZE, null)
-                    .getParameter(slot);
-                device.name().addValueObserver(name -> {
-                    names[index] = name;
-                    update();
-                });
-                device.exists().addValueObserver(present -> {
-                    exists[index] = present;
-                    update();
-                });
-            }
-        }
-
-        private void update()
-        {
-            int found = -1;
-            for (int i = 0; i < INNER_DEVICES; i++)
-            {
-                if (exists[i] && names[i] != null && names[i].trim().equals(deviceName))
-                {
-                    found = i;
-                    break;
-                }
-            }
-            if (found == boundIndex)
-            {
-                return;
-            }
-            boundIndex = found;
-            if (found < 0)
-            {
-                fader.clearBindings();
-            }
-            else
-            {
-                fader.setBinding(controls[found]);
-            }
-        }
     }
 
     /** A knob or encoder of a page: how it is tied to its parameter and released, and when it may be. */

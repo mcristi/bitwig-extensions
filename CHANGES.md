@@ -117,11 +117,8 @@ The unit runs its factory map (MIDI channel 15, latching layers off).
   switching one on switches the others off
 
 #### Faders
-- `1` - control 2 of the page `mix`, meant for the Chain's own Mix knob (wet/dry of all effects)
-- `2` - mix of the device named `Shaperbox` inside the Chain (control 2 of its remote controls)
-- `3` - mix of `Pitch Grain`
-- `4` - mix of `Guitar Rig`
-- The devices are found by name, exactly; a missing device leaves its fader without function
+- Faders 1-4 are controls 1-4 of the page `mix`: the Chain's own Mix knob (wet/dry of all effects), then the Mix knobs of the `Shaperbox`, `Pitch Grain` and `Guitar Rig` chains inside it, mapped onto that page in Bitwig
+- They are on the Chain's own page because the API sees the devices inside a Chain only while the Chain is open in Bitwig
 - No pickup: moving a fader sets the mix to the fader's position at once
 
 #### Encoders
